@@ -1,0 +1,18 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function (){
+            $("#id_anterior,#id_nueva").addClass("validate[required]");
+            $("#id_repetir").addClass("validate[required,equals[id_nueva]]");
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/pass{% endblock %}
+{% block formdestination %}/{% endblock %}
+{% block formwidth %}form-s{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='changepass'/>
+{% endblock %}
+{% block formback %}/{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

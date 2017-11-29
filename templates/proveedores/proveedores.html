@@ -1,0 +1,138 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script>
+
+        $(function() {
+
+            $("#search").click(function() {
+                var term = $("#searchfield").val().toUpperCase();
+                location.href = "/proveedores?s="+term;
+            });
+
+            $('#searchfield').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#search").trigger("click");
+                }
+            });
+
+            //Activar pestana
+            $("#pestana5").addClass('current');
+
+        });
+
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+
+        <div class="panel panel-turquesa">
+            <div class="panel-heading">
+                <div class="row-fluid">
+                    <div class="span8">
+                        <form class="form-search">
+                            <input class='searchinput input-xlarge search-query' type='text' id='searchfield' value='{{ search }}'/>
+                            <a href="#" id='search' class='btn btn-success tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                            {% if search %}
+                                <a href="/proveedores" id='allresults' class='btn btn-info tr' title="Ver todos"><i class="fa fa-list"></i></a>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th style="width: 50px"></th>
+                        <th style="width: 110px">Identificaci&oacute;n</th>
+                        <th>Nombre</th>
+                        <th style="width: 120px">Alias</th>
+                        <th style="width: 100px">Pais</th>
+                        <th style="width: 250px">Direcci&oacute;n</th>
+                        <th style="width: 170px">Email</th>
+                        <th style="width: 110px">Telef&oacute;no</th>
+                        <th style="width: 110px">Celular</th>
+                        <th style="width: 80px"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for proveedor in proveedores %}
+                        <tr>
+                            <td style="text-align: center">
+                                <a href='{% if proveedor.logo %}{{ proveedor.download_logo }}{% endif %}' class="{% if proveedor.logo %}fancybox{% endif %}" rel="group">
+                                    <img src="{% if proveedor.logo %}{{ proveedor.download_logo }}{% else %}/static/images/prod_avatar.png{% endif %}" {% if proveedor.logo %}width="25px" height="25px"{% endif %}>
+                                </a>
+                            </td>
+                            <td>{{ proveedor.identificacion }}</td>
+                            <td>{{ proveedor.nombre }}</td>
+                            <td>{{ proveedor.alias }}</td>
+                            <td>{{ proveedor.pais|default_if_none:'' }}</td>
+                            <td>{{ proveedor.direccion|default_if_none:'' }}</td>
+                            <td>{{ proveedor.email|default_if_none:'' }}</td>
+                            <td>{{ proveedor.telefono|default_if_none:"" }}</td>
+                            <td>{{ proveedor.celular|default_if_none:'' }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                        <span class="smaller10">Acciones</span>
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu pull-right list-group">
+                                        <li class="smaller10"><a class="list-group-item btn-form" href='/proveedores?action=edit&id={{ proveedor.id }}'><i class="fa fa-edit fa-fw"></i>&nbsp; Editar el proveedor</a></li>
+                                        {% if not proveedor.en_uso %}
+                                            <li class="smaller10"><a class="list-group-item btn-form" href="/proveedores?action=delete&id={{ proveedor.id }}"><i class="fa fa-times fa-fw"></i>&nbsp; Eliminar el proveedor</a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="10">
+                                {% if search %}
+                                    No se han encontrado proveedores segun la busqueda ingresada
+                                {% else %}
+                                    No existen proveedores registrados en el sistema
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class='row-fluid'>
+        <div class="span4">
+            <a href="/proveedores?action=add" class='btn btn-turquesa'><i class="fa fa-plus"></i> Adicionar</a>
+        </div>
+        <div class="span8">
+            {% if paging.num_pages > 20 %}
+                <div class='pagination'>
+                    <ul>
+                        {% if paging.primera_pagina %}
+                            <li><a href="/proveedores?page=1">1</a></li>
+                            <li><a href="/proveedores?page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                        {% endif %}
+                        {% for pagenumber in paging.paginas %}
+                            <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/proveedores?page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                        {% endfor %}
+                        {% if paging.ultima_pagina %}
+                            <li><a href="/proveedores?page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                            <li><a href="/proveedores?page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% else %}
+                <div class='pagination'>
+                    <ul>
+                        {% for pagenumber in paging.page_range %}
+                            <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/proveedores?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

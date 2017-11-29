@@ -1,0 +1,19 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script type="text/javascript">
+        $(function(){
+            $("#id_foto").addClass("validate[required]");
+            //Activar pestana
+            $("#pestana2").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}: {{ producto }}{% endblock %}
+{% block formaction %}/productos{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='cargarfoto'/>
+    <input type='hidden' name='id' value='{{ producto.id }}'/>
+{% endblock %}
+{% block formback %}/productos{% endblock %}
+{% block formdestination %}/productos?id={{ producto.id  }}{% endblock %}
+{% block buttonname %}Cargar Imagen{% endblock %}

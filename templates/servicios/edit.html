@@ -1,0 +1,50 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $("#id_codigo").attr("readonly", true);
+            $("#id_descripcion, #id_unidadmedida, #id_tiposervicio, #id_precio, #id_precio_cliente_normal, #id_precio_cliente_corporativo, #id_precio_cliente_vip").addClass("validate[required]");
+
+            $("#id_precio, #id_costo_estandar, #id_minimo, #id_precio_cliente_normal, #id_precio_cliente_corporativo, #id_precio_cliente_vip").blur(function(){
+                numerico($(this), 0, 99999999, 2);
+            });
+
+            get_next_product_code = function () {
+                var cid = $("#id_tiposervicio").val();
+                if (cid){
+                    $.ajax({
+                        type: "POST",
+                        url: "/servicios",
+                        data: {'action': 'get_next_codigo', 'cid': cid},
+                        success: function(data) {
+                            if (data.result == 'ok') {
+                                $("#id_codigo").val(data.codigo);
+                            } else {
+                                $.unblockUI();
+                                smoke.alert(data.mensaje);
+                            }
+                        },
+                        error: function() {
+                            $.unblockUI();
+                            smoke.alert("Error al enviar los datos.");
+                        },
+                        dataType: "json"
+                    });
+                }else{
+                    $("#id_codigo").val("");
+                }
+            };
+
+            $("#id_tiposervicio").change(get_next_product_code);
+
+            //Activar pestana
+            $("#pestana13").addClass('current');
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/servicios{% endblock %}
+{% block formdestination %}/servicios{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='edit'/>
+    <input type='hidden' name='id' value='{{ servicio.id }}'/>
+{% endblock %}
+{% block formback %}/servicios{% endblock %}

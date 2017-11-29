@@ -1,0 +1,251 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script type="text/javascript">
+        $(function() {
+
+            function parse_date(string){
+                try{
+                    var str_date = string.split("-");
+                    return [parseInt(str_date[2]), parseInt(str_date[1]), parseInt(str_date[0])];
+                }
+                catch (err){
+                    return null;
+                }
+            }
+
+            function is_fecha(date){
+                if ( Object.prototype.toString.call(date) === "[object Date]"){
+                    if ( isNaN( date.getTime()) == false ){
+                        return (date.getTime() != 0); // returns true or false
+                    }else
+                        return false;
+                }else
+                    return false;
+            }
+
+            function comparar_fechas(fecha1, fecha2, comparador){
+                try{   // verifica que las fechas sean válidas
+                    var dia_min = new Date(parse_date(fecha1));
+                    var dia_may = new Date(parse_date(fecha2));
+                    //alert(dia_min);
+                    //alert(dia_may);
+                    if(is_fecha(dia_min) && is_fecha(dia_may)){ // verifica que sean fechas validas
+                        switch (comparador){
+                            case "mayor":
+                            {
+                                return dia_min > dia_may;
+                            }
+                            case "menor":
+                            {
+                                return dia_min < dia_may;
+                            }
+                            case "mayori":
+                            {
+                                return dia_min >= dia_may;
+                            }
+                            case "menori":
+                            {
+                                return dia_min < dia_may;
+                            }
+                            default :
+                            {
+                                return false
+                            }
+                        }
+                    }
+                }
+                catch (err){
+                    return false
+                }
+            }
+
+            $("#inicio, #fin").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){
+                $(this).datepicker('hide');
+            });
+
+            // Radialize the colors
+            Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function (color) {
+                return {
+                    radialGradient: {
+                        cx: 0.5,
+                        cy: 0.3,
+                        r: 0.7
+                    },
+                    stops: [
+                        [0, color],
+                        [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
+                    ]
+                };
+            });
+
+            $("#fechaspanel .btn-cancelar").click(function(){
+                $("#fechaspanel").modal("hide");
+                return false;
+            });
+
+            $(".btnfechas").click(function(){
+                var action = $(this).attr("action");
+                $("#btngenerar").attr('action', action);
+                $("#fechaspanel").modal({"backdrop":"static", "width": "400px"}).modal("show");
+                return false;
+            });
+
+            $("#btngenerar").click(function(){
+                var action = $("#btngenerar").attr('action');
+                var inicio = $("#inicio").val();
+                var fin = $("#fin").val();
+                if (comparar_fechas(inicio, fin, "mayor")){
+                    $("#alertafechas").show();
+                }else{
+                    bloqueointerface();
+                    $("#fechaspanel").modal("hide");
+                    $("#alertafechas").hide();
+                    $(".btnfechas").removeClass("btn-success");
+                    $("#"+action).addClass("btn btn-success");
+                    $.ajax({
+                        type: "GET",
+                        url: "/estadisticas?action="+action+"&inicio="+inicio+"&fin="+fin,
+                        data: {},
+                        success: function(data) {
+                            $.unblockUI();
+                            $("#resultados").html("");
+                            $("#resultados").html(data).show();
+                        },
+                        error: function() {
+                            $.unblockUI();
+                        },
+                        dataType: "html"
+                    });
+                }
+
+
+                return false;
+            });
+
+            //Activar pestana
+            $("#pestana10").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block atras %}/{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class="span3">
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    Estad&iacute;sticas
+                </div>
+                <div class="panel-body">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th style="width: 5px"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Ventas totales del per&iacute;odo</td>
+                            <td style="text-align: center">
+                                <a href="#" id='ventas_totales' action='ventas_totales' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Pagos totales del per&iacute;odo</td>
+                            <td style="text-align: center">
+                                <a href="#" id="pagos_totales" action='pagos_totales' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Productos m&aacute;s vendidos</td>
+                            <td style="text-align: center">
+                                <a href="#" id="productos_mas_vendidos" action='productos_mas_vendidos' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Categor&iacute;as m&aacute;s vendidas</td>
+                            <td style="text-align: center">
+                                <a href="#" id="categorias_mas_vendidas" action='categorias_mas_vendidas' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Vendedores que m&aacute;s venden</td>
+                            <td style="text-align: center">
+                                <a href="#" id="vendedores_mas_venden" action='vendedores_mas_venden' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Vendedores que m&aacute;s comisionan</td>
+                            <td style="text-align: center">
+                                <a href="#" id="vendedores_mas_comisionan" action='vendedores_mas_comisionan' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Vendedores que m&aacute;s cobran</td>
+                            <td style="text-align: center">
+                                <a href="#" id="vendedores_mas_cobran" action='vendedores_mas_cobran' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Clientes que m&aacute;s compran</td>
+                            <td style="text-align: center">
+                                <a href="#" id="clientes_mas_compran" action='clientes_mas_compran' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Proveedores que m&aacute;s se les compra</td>
+                            <td style="text-align: center">
+                                <a href="#" id="proveedores_mas_compran" action='proveedores_mas_compran' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Resumen general del per&iacute;odo por proveedores</td>
+                            <td style="text-align: center">
+                                <a href="#" id="resumen_general_por_proveedores" action='resumen_general_por_proveedores' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Resumen general del per&iacute;odo por vendedores</td>
+                            <td style="text-align: center">
+                                <a href="#" id="resumen_general_por_vendedores" action='resumen_general_por_vendedores' class="btn btn-mini btnfechas"><i class="fa fa-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <span class="span9" id="resultados">
+            <!-- Aqui van los graficos y tablas generadas -->
+        </span>
+    </div>
+{% endblock %}
+
+{% block moreblock %}
+
+    <div class="modal fade static" id="fechaspanel" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Seleccione el per&iacute;odo</h3>
+        </div>
+        <div class="modal-body" style="text-align: center">
+            <div id="alertafechas" style="display: none" class="alert alert-danger">Fecha de inicio es mayor que fecha fin</div>
+            <form class="well form-xs">
+                <fieldset>
+                    <b>Fecha Inicio: </b><input id="inicio" type="text" value="{{ inicio|date:'d-m-Y' }}" class="selectorfecha"/>
+                </fieldset>
+                <fieldset>
+                    <b>Fecha Final: </b>&nbsp;<input id="fin" type="text" value="{{ fin|date:'d-m-Y' }}" class="selectorfecha"/>
+                </fieldset>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-turquesa" id="btngenerar" action=""><i class="fa fa-check"></i> Generar</a>
+                <a href="#" class="btn btn-cancelar"><i class="fa fa-arrow-left"></i> Cancelar</a>
+            </div>
+        </div>
+    </div>
+
+    {% include "notificacionpanel.html" %}
+{% endblock %}

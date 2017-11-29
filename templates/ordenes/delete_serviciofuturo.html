@@ -1,0 +1,14 @@
+{% extends "ajaxdeletebs.html" %}
+{% block extraheading %}
+    <script>
+    $(function () {
+    });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/ordenes?action=serviciosfuturos&id={{ orden.id }}{% endblock %}
+{% block formdestination %}/ordenes?action=serviciosfuturos&id={{ orden.id }}{% endblock %}
+{% block formaction %}/ordenes{% endblock %}
+{% block formactionvalue %}delete_serviciofuturo{% endblock %}
+{% block formobjectid %}{{ servicio_futuro.id }}{% endblock %}
+{% block formobjectname %}el servicio futuro <b>{{ servicio_futuro.servicio }}</b> de la orden <b>{{ orden.repr_id }}</b>{% endblock %}

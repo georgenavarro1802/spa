@@ -1,0 +1,563 @@
+#content td#nada{
+    width:1px;
+}
+
+#content table.listadoPrivado td#nada table.actions{
+    width:100%;
+}
+
+#content #nada table tbody{
+    border:0;
+}
+
+#content table.listadoPrivado td#nada table.actions tbody td{
+    text-align:center;
+    vertical-align:middle;
+    padding: 0 5px 0 0;
+}
+
+#content #tablaListado tbody td#nada table.actions tr:hover{
+    background-color:inherit;
+}
+
+
+.box {
+    float: left;
+    width: 960px;
+    margin: 0 20px 20px 0;
+    display:table;
+}
+
+.box .header {
+    /*background: #3d3d3d url("/static/images/headerbox.png") repeat-x;*/
+    border-top: 1px solid #444;
+    border-radius: 5px 5px 0 0;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    position: relative;
+    margin: -1px -1px 0 -1px;
+    padding: 7px 0 9px 20px;
+
+
+}
+.box .header h3 {position: relative; top: 2px; display: inline; font-size: 150%; color: #fff; text-shadow: #151515 0 1px 0;}
+.box .header .button {margin-left: 15px;}
+/* tags in the header */
+.box .header ul {position: absolute; right: 9px; bottom: 0;}
+.box .header ul li {display: inline;}
+.box .header ul a {
+    border-radius: 5px 5px 0 0;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    background: #777; border: 0; float: left;
+    margin: 0 0 0 5px; padding: 8px 13px 6px; color: #fff;
+
+}
+.box .header ul a.active,
+.box .header ul a:hover,
+.box .header ul a:focus,
+    /*.box .header ul a:active {background: #fff url("/static/images/headertab.png") repeat-x; color: #444;}*/
+
+
+.box .content {margin-bottom: 5px;}
+.box .content table {width: 100%;}
+.box .content table th,
+
+.box .content table td, .box .content table.barraListado  td {
+    padding-left:10px;
+    padding-right:10px;
+    vertical-align:middle;
+    height:37px;
+}
+
+.box .content table.barraListado  td {
+    height:37px;
+    vertical-align:middle;
+    padding: 1px 10px 0;
+}
+
+.box .content table th {text-align: left; font-weight: normal;}
+.box .content table tr.even th,
+.box .content table tr.even td {background: #f5f5f5;}
+
+.box .content table th.first,
+.box .content table td.first {padding-left: 20px;}
+
+.box .content  table  thead th,
+.box .content  table   thead  td {
+    border-left: 1px solid #f2f2f2;
+    border-right: 1px solid #d5d5d5;
+    background: #ddd url("/static/images/thead.gif") repeat-x;
+}
+
+
+.box .content  table  thead th,
+.box .content  .colLast {
+    text-shadow: #fff 0 1px 0;
+}
+
+#content .box .content  table#tablaListado  thead th{
+    font-weight:bold;
+}
+
+.box .content table  thead th.colFirst,
+.box .content table  thead td.colFirst,
+.box .content table  tbody td.colFirst {
+    border-left:0;
+
+}
+.box .content table  thead th.colLast,
+.box .content table  thead td.colLast,
+.box .content table  tbody td.colLast {
+    border-right:0;
+}
+
+.box .content table.cabeceraTabla,
+.box .content table.cabeceraTabla  thead  th
+
+, .box .content table.cabeceraTabla  thead  td{
+    background:none;
+    padding:inherit;
+    border:0;
+}
+.box .content table.cabeceraTabla,
+.box .content table.cabeceraTabla   th
+
+, .box .content table.cabeceraTabla   td{
+    padding:0;
+}
+
+#content table.cabeceraTabla th {
+    line-height:inherit;
+    height:inherit;
+    margin:0;
+    padding:0;
+    border-bottom: 0;
+}
+
+.box .content table.barraListado   td table td {
+    border:0;
+    width:inherit;
+    vertical-align:middle
+}
+
+.box .content table tbody tr.first td {border-top: 1px solid #bbb;}
+
+.box .content table#tablaListado  thead tr th.campo	{
+    border-bottom: 1px solid #bbb;
+}
+
+
+
+.box .content table.barraListado  td {
+    text-shadow:inherit;
+    text-align:left;
+    border-bottom: 1px solid #bbb;
+}
+/*.box .content table a.ico-comms {border: 0; background: url("/static/images/ico-tablecomms.gif") 50% 60% no-repeat; padding: 10px; color: #fff;}*/
+.box .content table tfoot th,
+    /*.box .content table tfoot td, .cesta_subtotal {border-top: 1px solid #ccc; background: #fff url("/static/images/tfoot.gif") repeat-x;}*/
+
+.box .content ul.simple li {clear: both; padding: 10px 20px 8px 20px; overflow: hidden;}
+.box .content table tr.even th,
+.box .content ul.simple li.even {background: #f5f5f5;}
+
+.box .content ul.simple strong {float: left; font-weight: normal;}
+.box .content ul.simple span {float: right;}
+
+.box .content .grid {}
+.box .content .grid .line {border-bottom: 1px solid #ddd; width: 100%; overflow: hidden;}
+.box .content .grid .even {background: #f5f5f5;}
+
+
+.box .content .grid .item {float: left; width: 50%;}
+.box .content .grid .item .inner {padding: 17px 15px 12px 20px;}
+.box .content .grid .firstline {border-top: 0 !important;}
+.box .content .grid .lastline {border-bottom: 0 !important;}
+.box .content .grid .item a.thumb {border: 0; float: left;}
+.box .content .grid .item .data {margin-left: 165px;}
+.box .content .grid .item h4 {margin: 0 0 10px 0; font-size: 110%; font-weight: bold;}
+.box .content .grid .item h4 span {margin-right: 5px; font-weight: normal; font-size: 90%;}
+.box .content .grid .item p {margin: 0 0 5px 0; color: #666;}
+.box .content .grid ul.actions {margin-top: 8px;}
+
+
+/* Paginador */
+/*.pagination {*/
+    /*border-top: 1px solid #999;*/
+    /*/!*background: #fff url('/static/images/pagination.gif') repeat-x; *!/*/
+    /*color: #333 !important;*/
+    /*vertical-align:middle;*/
+    /*padding-left:10px;*/
+
+    /*margin-top:5px;*/
+
+/*}*/
+/*.pagination ul {*/
+    /*margin-top:-1px;*/
+    /*padding: 9px 10px 3px;*/
+    /*text-align:center;*/
+/*}*/
+/*.pagination ul li {display: inline;}*/
+
+
+/*.pagination a {*/
+    /*/!*margin: 0 2px; *!/*/
+    /*margin: 0 4px;*/
+    /*display: inline-block;*/
+/*}*/
+
+/*.pagination ul strong {*/
+    /*/!*background: url("/static/images/pagination-arrow.gif") 50% 0 no-repeat; 	*!/*/
+    /*/!*padding: 14px 10px 8px;*!/*/
+    /*padding:14px 12px 8px;*/
+    /*font-weight:bold;*/
+/*}*/
+
+/*.pagination span {*/
+    /*float:left; margin-top:-20px;*/
+/*}*/
+
+/*.pagination span strong{*/
+    /*font-weight:normal;*/
+/*}*/
+
+.box-100 {
+    width:100%;
+    border:0;
+}
+
+.boxin {
+    box-shadow: #aaa 0 0 10px;
+    -webkit-box-shadow: #aaa 0 0 10px;
+    -moz-box-shadow: #aaa 0 0 10px;
+    border: 1px solid #999;
+
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+
+    background: #fff;
+}
+
+
+fieldset{
+    border: 0; margin: 0; padding: 0; vertical-align: baseline; font-weight: inherit; font-style: inherit; font-size: 100%;
+}
+
+.tc {text-align: center !important;}
+
+.first {border-left: 0 !important;}
+
+
+.tag {
+    padding: 4px 7px; color: #fff !important;
+
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.tag-gray {
+    border-bottom: 1px solid #666;
+    background: #999;
+    /*background: gradient(linear, left top, left bottom, from(#bbb), to(#999));*/
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#bbb), to(#999));*/
+}
+
+
+
+#ui-datepicker-div select.ui-datepicker-month, #ui-datepicker-div select.ui-datepicker-year {
+    border: 1px solid #c4c4c4;
+    padding:2px;
+    width:48%;
+}
+
+#ui-datepicker-div select.ui-datepicker-month{
+    margin-right: 5px;
+}
+
+#ui-datepicker-div .ui-corner-all{
+    margin-top:2px;
+}
+
+
+
+
+
+.form .fields {
+    display:table;
+    width:100%;
+
+}
+.form .fields fieldset {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    padding: 10px 15px 15px 15px;
+
+}
+.form .fields fieldset.last {margin-bottom: 0; border-right: 1px solid #ccc !important;}
+.form .fields div.sep {
+    margin-top: 5px;
+}
+
+
+.form .fields .check{
+    position:relative;
+    top:2px;
+    margin-right:2px;
+}
+.form .fields label.check,
+.form .fields label.radio {
+    display:inline;
+    position:relative;
+    top:-2.3px;
+}
+
+.form .fields span.loading {margin-left: 10px;}
+
+.form  {padding: 18px; }
+
+
+.form .plain {padding: 0;}
+
+.form .basic dl {width: 100%; overflow: hidden;}
+.form .basic dl dt,
+.form .basic dl dd {float: left;}
+.form .basic dl dt {padding: 3px 5px 3px 0; width: 20%;}
+.form .basic dl dd {padding: 3px 0 3px 5px; width: 76%;}
+
+label.check,
+label.radio {margin-right: 5px;}
+/*.form  small {color: #999;}*/
+
+input,
+textarea,
+select,
+select.multiple,
+.multipleCheckbox,
+.skinned-select .select-text,
+.busqueda #cajaBus{
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+
+    /*background: url("/static/images/txt.gif") repeat-x;*/
+    background-color:#FFFFFF;
+}
+
+.skinned-select .select-text{
+    -webkit-border-top-right-radius: 0 !important;
+    -moz-border-radius-topright: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.busqueda #cajaBus,
+.datepicker .skinned-select input{
+    -webkit-border-top-right-radius: 0;
+    -moz-border-radius-topright: 0;
+    border-top-right-radius: 0;
+
+    -webkit-border-bottom-right-radius: 0;
+    -moz-border-radius-bottomright: 0;
+    border-bottom-right-radius: 0;
+}
+
+
+
+
+.form .basic input.txt,
+.form .basic textarea {width: 100%;}
+input.error,
+    /*textarea.error {border-color: #d35757; background-image: url("/static/images/txt-error.gif");}*/
+    /*span.loading {background: url("/static/images/upload.gif") 0 50% no-repeat; padding: 3px 0 3px 20px;}*/
+
+.form fieldset{
+    border: 1px solid #ccc;
+}
+
+
+/************** LISTADO ****************************/
+.admin_no_resultados:hover{
+    background-color:#ffffff;
+    cursor:auto;
+}
+/************* Listado desplegable ****************/
+
+table#tablaListado tbody td span{
+    display:block;
+}
+table#tablaListado tbody td .tabRel{
+    position:absolute;
+    width:210px;
+
+    border: 1px solid #bbb;
+    background-color:#FFFFFF;
+}
+
+#content div.desplegableCarrito{
+    border: 1px solid #bbb;
+
+    width:130px;
+    display:inline-block;
+    background-color:#FFFFFF;
+    padding: 0 15px 5px;
+}
+
+table#tablaListado tbody td span .tabRel span {
+    padding: 5px 15px;
+
+    border-top: 1px solid #bbb;
+    border-bottom:0;
+}
+
+table#tablaListado tbody td span .tabRel span.primeraLinea{
+    border-top: 0;
+
+    -webkit-border-top-left-radius: 5px !important;
+    -webkit-border-top-right-radius: 5px !important;
+
+    -moz-border-radius-topleft: 5px !important;
+    -moz-border-radius-topright: 5px !important;
+
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+}
+
+table#tablaListado tbody td span .tabRel span.ultimaLinea{
+
+    -webkit-border-bottom-left-radius: 5px !important;
+    -webkit-border-bottom-right-radius: 5px !important;
+
+    -moz-border-radius-bottomleft: 5px !important;
+    -moz-border-radius-bottomright: 5px !important;
+
+    border-bottom-left-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+}
+
+/************** Columnas listado ******************/
+
+.cabcolcantidadminima, .colcantidadminima, .cabcolref2, .colref2{
+    display:none;
+}
+
+
+#tablaListado .cabcolcantidad thead th, #tablaListado .cabcolcoste thead th
+, #tablaListado .cabcolprecio thead th, #tablaListado .cabcolpvp thead th, #tablaListado .cabcolprecioImpuestos thead th
+, #tablaListado .cabcoldescuento thead th, #tablaListado .cabcolprecioOferta thead th, #tablaListado .cabcolcantidadminima thead th
+, #tablaListado .cabcoltotal thead th, #tablaListado .cabcolvisto thead th{
+    text-align:right;
+    /*	padding-right:0;*/
+}
+
+
+.colcoste, .colprecio, .colcantidad, .colorden, .coltotal, .colpvp
+, .coldescuento, .colprecioOferta, .colrecargo, .colprecioImpuestos
+, .colvisto, .colcantidadminima, .coldescripcion
+, .coldescuentoArticulo
+, .coldentrega{
+    text-align:right;
+    padding-right:5px;
+}
+
+
+
+#informe .cabcolcantidad, #informe .cabcolcoste
+, #informe .cabcolprecio, #informe .cabcolpvp, #informe .cabcolprecioImpuestos
+, #informe .cabcoldescuento, #informe .cabcolprecioOferta, #informe .cabcolcantidadminima
+, #informe .cabcoltotal, #informe .cabcolvisto
+
+, #informe .cabcoldescripcion
+, #informe .cabcolrecargo
+, #informe .cabcoldentrega
+, #informe .cabcoldescuentoArticulo
+{
+    text-align:right;
+    padding-right:7px;
+}
+
+.columna{
+    cursor:pointer;
+}
+
+
+/************ Listado estadisticas *************/
+
+.nombreFiltroSelector{
+    float:left;
+    padding-left:3px;
+    padding-right:4px;
+}
+
+
+
+
+
+
+
+
+/****************** Listado formulario **************************************/
+
+#content .form  #tablaListado tbody tr:hover{
+    background:inherit;
+    cursor:auto;
+}
+#content .form  #tablaListado thead th{
+    cursor:auto;
+}
+#content .form  #tablaListado  tbody tr td{
+    padding: 7px 6px 2px 8px;
+}
+#content .form  #tablaListado  tbody td table td,
+#content .form  #tablaListado  tbody td table tr{
+    border:0;
+}
+
+#content .form  .listadoPrivado tbody td{
+    vertical-align:top;
+}
+
+
+.tablaRadio{
+    border:1px #ddd solid;
+    width:10%;
+    display:table;
+}
+
+
+#content .form .cartContentsDisplay th,
+#content .form .cartContentsDisplay td{
+    border-left:1px #ddd solid;
+    border-top:1px #ddd solid;
+
+    font-weight:bold;
+    padding:10px;
+}
+
+#content .form .cartContentsDisplay th{
+    border-top:0;
+}
+
+
+#content .form .cartContentsDisplay, .campoMultiple{
+    width:10%;
+}
+#content .form .cartContentsDisplay tbody,
+#content .form .cartContentsDisplay  tr,
+.campoMultiple tbody{
+    border:0;
+
+}
+
+#content .form .cartContentsDisplay td{
+    vertical-align:middle;
+}

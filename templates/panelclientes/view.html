@@ -1,0 +1,126 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script>
+        $(function() {
+
+        });
+
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class="span3 hidden-tablet hidden-phone visible-desktop">
+            <ul class="thumbnails">
+                <li>
+                    {% if cliente.foto %}
+                        <img src="{{ cliente.download_foto }}">
+                    {% else %}
+                        <img src="/static/images/human.png">
+                    {% endif %}
+                    <h5 style="text-align: center;">{{ cliente.nombre }}</h5>
+                    <h5 style="text-align: center;">{{ cliente.identificacion }}</h5>
+                </li>
+            </ul>
+            <hr/>
+            {% if documentossinentregar %}
+                <div class="alert alert-danger">
+                    <h4>AVISO IMPORTANTE</h4>
+                    UD DEBE ENTREGAR {{ documentossinentregar }} documento{% if documentossinentregar > 1 %}s{% endif %} a la Biblioteca
+                </div>
+            {% endif %}
+        </div>
+        <div class="span9" style="margin-left: 1em">
+            {% if cliente.mi_cumpleannos %}
+                <div class="alert alert-danger">
+                    <a href="#" class="close" data-dismiss="alert">×</a>
+                    <h4 class="alert-heading">MUCHAS FELICIDADES</h4>
+                    <br/>
+                    <div class="row-fluid">
+                        <div class="span3" style="text-align: center;">
+                            <img src='/static/images/cake.png'/>
+                        </div>
+                        <div class="span6">
+                            <p style="font-size: 14px">
+                                <b>{{ nombreinstitucion }}</b> le desea que pase un excelente d&iacute;a en compa&ntilde;&iacute;a de familiares y seres queridos
+                                <br><br>
+                            </p>
+                            <p style="text-align: center; font-size: 17px">
+                                <b>FELIZ CUMPLEA&Ntilde;OS !!!!!!</b>
+                             </p>
+                        </div>
+                        <div class="span3"  style="text-align: center;">
+                            <img src='/static/images/cake.png'/>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if datosincompletos %}
+                <div class="alert alert-danger">
+                    <a  href="#" class="close" data-dismiss="alert">×</a>
+                    <h4 class="alert-heading">ALERTA</h4>
+                    Aun le quedan <b>DATOS PERSONALES</b> por llenar en su Cuenta,
+                    por favor ingreselos lo m&aacute;s pronto posible
+                </div>
+            {% endif %}
+            <hr/>
+            <div class='row-fluid'>
+                <a href="/panelclientes?action=cliente_servicios_recibidos&id={{ cliente.id }}" class="btn-form">
+                    <div class='icon2'>
+                        <div class='iconimage'>
+                            <div class='pd'>
+                                <img src='/static/images/iconos/activos.png' border="0"/>
+                            </div>
+                        </div>
+                        <div class='iconname'>
+                            <div class='pd'>
+                                <h4 class='tituloicon'>Servicios recibidos</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="/panelclientes?action=cliente_productos_comprados" class="btn-form">
+                    <div class='icon2'>
+                        <div class='iconimage'>
+                            <div class='pd'>
+                                <img src='/static/images/iconos/activos.png' border="0"/>
+                            </div>
+                        </div>
+                        <div class='iconname'>
+                            <div class='pd'>
+                                <h4 class='tituloicon'>Productos comprados</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="/panelclientes?action=cliente_servicios_futuros" class="btn-form">
+                    <div class='icon2'>
+                        <div class='iconimage'>
+                            <div class='pd'>
+                                <img src='/static/images/iconos/activos.png' border="0"/>
+                            </div>
+                        </div>
+                        <div class='iconname'>
+                            <div class='pd'>
+                                <h4 class='tituloicon'>Servicios futuros</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="/panelclientes?action=cliente_paquetes" class="btn-form">
+                    <div class='icon2'>
+                        <div class='iconimage'>
+                            <div class='pd'>
+                                <img src='/static/images/iconos/activos.png' border="0"/>
+                            </div>
+                        </div>
+                        <div class='iconname'>
+                            <div class='pd'>
+                                <h4 class='tituloicon'>Paquetes</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

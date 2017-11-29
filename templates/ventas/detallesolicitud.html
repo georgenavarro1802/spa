@@ -1,0 +1,32 @@
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th style="width: 100px">C&oacute;digo</th>
+        <th>Descripci&oacute;n</th>
+        <th style="width: 60px; text-align: center">Cant.</th>
+        <th style="width: 80px; text-align: center">Precio</th>
+        <th style="width: 80px; text-align: center">Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for d in detalles %}
+        <tr class="normal11">
+            <td>{{ d.producto.codigo }}</td>
+            <td>{{ d.producto.descripcion }}</td>
+            <td style="text-align: center">{{ d.cantidad|floatformat:0 }}</td>
+            <td style="text-align: right">${{ d.precio|floatformat:2 }}</td>
+            <td style="text-align: right">${{ d.valor|floatformat:2 }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="4">Iva: <b>${{ solicitud.iva|floatformat:2 }}</b> &nbsp; Total: <b>${{ solicitud.total|floatformat:2 }}</b></td>
+        <td style="text-align: right; font-weight: bold">$ {{ solicitud.subtotal|floatformat:2 }}</td>
+    </tr>
+    </tfoot>
+</table>
+
+{% if solicitud.observaciones %}
+    <span><b>Observaciones: </b> {{ solicitud.observaciones }}</span>
+{% endif %}

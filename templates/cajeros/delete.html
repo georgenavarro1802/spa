@@ -1,0 +1,17 @@
+{% extends "ajaxdeletebs.html" %}
+{% block extraheading %}
+    <script>
+    $(function () {
+        //Activar pestana
+        $("#pestana12").addClass('current');
+    });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/cajeros{% endblock %}
+{% block formdestination %}/cajeros{% endblock %}
+{% block formaction %}/cajeros{% endblock %}
+{% block formactionvalue %}delete{% endblock %}
+{% block formobjectid %}{{ cajero.id }}{% endblock %}
+{% block formobjectname %}el cajero: <b>{{ cajero }}</b>{% endblock %}
+

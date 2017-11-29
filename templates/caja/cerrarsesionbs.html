@@ -1,0 +1,81 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+
+            $("#id_bill100, #id_bill50, #id_bill20, #id_bill10, #id_bill5, #id_bill2, #id_bill1").blur(function(){
+                numerico($(this), 0, 99999999, 0);
+            });
+
+            $("#id_enmonedas, #id_cheque, #id_deposito, #id_transferencia").blur(function(){
+                numerico($(this), 0, 99999999, 2);
+            });
+
+            $("#id_total").attr("disabled", "disabled");
+
+            calcula = function() {
+                var total = $("#id_total");
+                var b100 = parseFloat($("#id_bill100").val()) * 100;
+                if (!b100) { b100 = 0; }
+
+                var b50 = parseFloat($("#id_bill50").val()) * 50;
+                if (!b50) { b50 = 0; }
+
+                var b20 = parseFloat($("#id_bill20").val()) * 20;
+                if (!b20) { b20 = 0; }
+
+                var b10 = parseFloat($("#id_bill10").val()) * 10;
+                if (!b10) { b10 = 0; }
+
+                var b5 = parseFloat($("#id_bill5").val()) * 5;
+                if (!b5) { b5 = 0; }
+
+                var b2 = parseFloat($("#id_bill2").val()) * 2;
+                if (!b2) { b2 = 0; }
+
+                var b1 = parseFloat($("#id_bill1").val());
+                if (!b1) { b1 = 0; }
+
+                var bem = parseFloat($("#id_enmonedas").val());
+                if (!bem) { bem = 0; }
+
+                var bdep = parseFloat($("#id_deposito").val());
+                if (!bdep) { bdep = 0; }
+
+                var bcheq = parseFloat($("#id_cheque").val());
+                if (!bcheq) { bcheq = 0; }
+
+                var btransf = parseFloat($("#id_transferencia").val());
+                if (!bdep) { bdep = 0; }
+
+                total.val(b100+b50+b20+b10+b5+b2+b1+bem+bcheq+bdep+btransf);
+                redondear(total);
+            };
+
+            $("#id_bill100").change(calcula);
+            $("#id_bill50").change(calcula);
+            $("#id_bill20").change(calcula);
+            $("#id_bill10").change(calcula);
+            $("#id_bill5").change(calcula);
+            $("#id_bill2").change(calcula);
+            $("#id_bill1").change(calcula);
+            $("#id_enmonedas").change(calcula);
+            $("#id_cheque").change(calcula);
+            $("#id_deposito").change(calcula);
+            $("#id_transferencia").change(calcula);
+
+            //Activar pestana
+            $("#pestana3").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}: {{ caja }}{% endblock %}
+{% block formaction %}/caja{% endblock %}
+{% block formdestination %}/caja{% endblock %}
+{% block formwidth %}form-s{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='closesesion'/>
+    <input type='hidden' name='id' value='{{ sesion.id }}'/>
+{% endblock %}
+{% block formback %}/caja{% endblock %}
+{% block buttonname %}Cerrar Sesi&oacute;n{% endblock %}

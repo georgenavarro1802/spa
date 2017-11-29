@@ -1,0 +1,17 @@
+{% extends "ajaxdeletebs.html" %}
+{% block extraheading %}
+    <script>
+    $(function () {
+        //Activar pestana
+        $("#pestana5").addClass('current');
+    });
+    </script>
+{% endblock %}
+{% block atras %}/proveedores{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/proveedores{% endblock %}
+{% block formdestination %}/proveedores{% endblock %}
+{% block formaction %}/proveedores{% endblock %}
+{% block formactionvalue %}delete{% endblock %}
+{% block formobjectid %}{{ proveedor.id }}{% endblock %}
+{% block formobjectname %}el proveedor: <b>{{ proveedor }}</b>{% endblock %}

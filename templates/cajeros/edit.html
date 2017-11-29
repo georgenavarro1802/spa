@@ -1,0 +1,24 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <style>
+        #formulary table td input#id_email { text-transform: none; }
+    </style>
+    <script>
+        $(function(){
+            $("#id_nombre, #id_cedula #id_usuario").addClass("validate[required]");
+
+            //Activar pestana
+            $("#pestana12").addClass('current');
+        });
+
+    </script>
+{% endblock %}
+
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/cajeros{% endblock %}
+{% block formdestination %}/cajeros{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='edit'/>
+    <input type='hidden' name='id' value='{{ cajero.id }}'/>
+{% endblock %}
+{% block formback %}/cajeros{% endblock %}

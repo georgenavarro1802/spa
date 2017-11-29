@@ -1,0 +1,18 @@
+{% extends "ajaxconfirmacionbs.html" %}
+{% block extraheading %}
+    <script>
+    $(function () {
+        //Activar pestana
+        $("#pestana12").addClass('current');
+    });
+    </script>
+{% endblock %}
+{% block atras %}/cajeros{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/cajeros{% endblock %}
+{% block formdestination %}/cajeros{% endblock %}
+{% block formaction %}/cajeros{% endblock %}
+{% block formactionvalue %}resetear{% endblock %}
+{% block formobjectid %}{{ cajero.id }}{% endblock %}
+{% block mensaje %}Est&aacute; seguro que desea resetear la clave de: {% endblock %}
+{% block formobjectrepr %}{{ cajero.usuario.username }}{% endblock %}

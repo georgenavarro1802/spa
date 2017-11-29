@@ -1,0 +1,77 @@
+<script>
+    $(function () {
+
+        // Build the chart
+        $('#contenido1').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: ''
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        },
+                        connectorColor: 'silver'
+                    }
+                }
+            },
+            series: [{
+                name: 'Top Ten Productos',
+                data: [
+                    {% for p in topten %}
+                        { name: '{{ p.0.codigo }}', y: {{ p.1|floatformat:0 }} }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+
+    });
+</script>
+
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title1 }}</div>
+    <div class="panel-body">
+        <div id="contenido1" style="height: 350px; max-width: 500px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title2 }}</div>
+    <div class="panel-body">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="width: 10px"></th>
+                <th>Producto</th>
+                <th style="width: 100px; text-align: center">Facturas</th>
+                <th style="width: 150px; text-align: center">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for v in topten %}
+                <tr>
+                    <td style="text-align: center">{{ forloop.counter }}</td>
+                    <td>{{ v.0.nombre_corto }}</td>
+                    <td style="text-align: center">{{ v.1|floatformat:0 }}</td>
+                    <td style="text-align: right">$ {{ v.2|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

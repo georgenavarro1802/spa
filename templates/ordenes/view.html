@@ -1,0 +1,168 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Detalles orden de servicio
+            $("#detalle_orden .btn-aceptar").click(function(){
+                $("#detalle_orden").modal("hide");
+                return false;
+            });
+
+            $(".detalleorden").click(function() {
+                var ordenid = $(this).attr("ordenid");
+                var num_orden = $(this).attr("numorden");
+                var nombre_colaborador = $(this).attr("nombrecolaborador");
+                $.get("/ordenes", {'action':'detalle_orden', 'id': ordenid}, function(data) {
+                    $("#num_orden").html(num_orden);
+                    $("#colaborador_orden").html(nombre_colaborador);
+                    $("#detalle_orden .modal-body").html(data);
+                    $("#detalle_orden").modal({"backdrop":"static", "width": "1100px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            $("#clientesel").change(function(){
+                bloqueointerface();
+                var cid = $(this).val();
+                location.href = '/ordenes?c='+cid;
+            });
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class="span10">
+            <form class="form-search">
+                <input class='searchinput input-xlarge search-query' type='text' id='searchfield' value='{{ search }}'/>
+                <a href="#" id='search' class='btn btn-success tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                {% if search %}
+                    <a href="/ordenes" id='allresults' class='btn btn-info tr' title="Ver todos"><i class="fa fa-list"></i></a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="span2">
+            <form>
+                <label for="clientesel"></label>
+                <select id='clientesel'>
+                    <option value='0'>-----</option>
+                    {% for c in clientes %}
+                        <option value="{{ c.id }}" {% ifequal clienteid c.id %}selected="selected"{% endifequal %}>{{ c.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    Mis Ordenes de Servicios
+                </div>
+                <div class="panel-body">
+                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th style="width: 100px">Orden</th>
+                            <th style="width: 120px">Fecha</th>
+                            <th>Cliente</th>
+{#                            <th style="width: 80px; text-align: center">SubTotal</th>#}
+{#                            <th style="width: 80px; text-align: center">IVA</th>#}
+{#                            <th style="width: 80px; text-align: center">Total</th>#}
+                            <th style="width: 80px; text-align: center">Prod.</th>
+                            <th style="width: 80px; text-align: center">Serv.</th>
+                            <th style="width: 100px; text-align: center">Factura Asig.</th>
+                            <th style="width: 100px; text-align: center">Fecha Asig.</th>
+                            <th style="width: 100px"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for orden in ordenes %}
+                            <tr>
+                                <td class="larger"> {{ orden.repr_id }}</td>
+                                <td class="larger"> {{ orden.fecha|date:'d-m-Y' }}</td>
+                                <td class="larger">{{ orden.cliente }} </td>
+{#                                <td style="text-align: right"> ${{ orden.subtotal|floatformat:2 }}</td>#}
+{#                                <td style="text-align: right"> ${{ orden.iva|floatformat:2 }}</td>#}
+{#                                <td style="text-align: right"> ${{ orden.total|floatformat:2 }}</td>#}
+                                <td style="text-align: center" class="larger">{{ orden.cantidad_productos|floatformat:0 }}</td>
+                                <td style="text-align: center" class="larger">{{ orden.cantidad_servicios|floatformat:0 }}</td>
+                                <td style="text-align: center">{{ orden.factura_asignada.numero|default_if_none:'' }}</td>
+                                <td style="text-align: center">{{ orden.fecha_asignada|date:'d-m-Y' }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                            Acciones
+                                            <span class="caret"></span>
+                                        </a>
+                                        <ul class="dropdown-menu pull-right list-group">
+                                            <li><a class="detalleorden" href='#' ordenid="{{ orden.id }}" numorden="{{ orden.repr_id }}" nombrecolaborador="{{ orden.colaborador.nombre }}"><i class="fa fa-list"></i> Detalles</a></li>
+                                            <li><a href='/ordenes?action=serviciosfuturos&id={{ orden.id }}' class="btn-form"><i class="fa fa-table"></i> Servicios Futuros</a></li>
+                                            {% if not orden.en_uso %}
+                                                <li class="divider"></li>
+                                                <li><a href='/ordenes?action=delete&id={{ orden.id }}' class="btn-form"><i class="fa fa-times"></i> Eliminar</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="15">
+                                    NO EXISTEN ORDENES DE SERVICIOS REGISTRADAS EN EL SISTEMA
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <a href="/ordenes?action=add" class='btn btn-turquesa btn-form'><i class="fa fa-plus"></i> Adicionar</a>
+            </div>
+            <div class='row-fluid'>
+                {% if paging.num_pages > 20 %}
+                    <div class='pagination'>
+                        <ul>
+                            {% if paging.primera_pagina %}
+                                <li><a href="/ordenes?page=1">1</a></li>
+                                <li><a href="/ordenes?page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                            {% endif %}
+                            {% for pagenumber in paging.paginas %}
+                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/ordenes?action=consulta_solicitudes_vendedores&page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                            {% endfor %}
+                            {% if paging.ultima_pagina %}
+                                <li><a href="/ordenes?page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                                <li><a href="/ordenes?page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class='pagination'>
+                        <ul>
+                            {% for pagenumber in paging.page_range %}
+                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/ordenes?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block moreblock %}
+    <div class="modal fade static" id="detalle_orden" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Detalles de orden de servicio #<span id="num_orden"></span> generada por el colaborador: <span id="colaborador_orden"></span></h3>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

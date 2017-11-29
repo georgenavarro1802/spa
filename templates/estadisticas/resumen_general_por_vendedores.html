@@ -1,0 +1,172 @@
+<script>
+    $(function () {
+
+        $('#contenido1').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: ''
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        },
+                        connectorColor: 'silver'
+                    }
+                }
+            },
+            series: [{
+                name: 'Facturado',
+                data: [
+                    {% for v in lista_vendedores %}
+                        { name: '{{ v.0 }}', y: {{ v.1|floatformat:2 }} }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+
+        $('#contenido2').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: ''
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        },
+                        connectorColor: 'silver'
+                    }
+                }
+            },
+            series: [{
+                name: 'Cobrado',
+                data: [
+                    {% for v in lista_vendedores %}
+                        { name: '{{ v.0 }}', y: {{ v.2|floatformat:2 }} }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+
+        $('#contenido3').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: ''
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        },
+                        connectorColor: 'silver'
+                    }
+                }
+            },
+            series: [{
+                name: 'Pendiente',
+                data: [
+                    {% for v in lista_vendedores %}
+                        { name: '{{ v.0 }}', y: {{ v.2|floatformat:2 }} }
+                        {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+
+    });
+</script>
+
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title3 }}</div>
+    <div class="panel-body">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="width: 10px"></th>
+                <th>Vendedor</th>
+                <th style="width: 120px; text-align: center">Usuario</th>
+                <th style="width: 120px; text-align: center">Facturado</th>
+                <th style="width: 120px; text-align: center">Cobrado</th>
+                <th style="width: 120px; text-align: center">Pendiente</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for v in lista_vendedores %}
+                <tr>
+                    <td style="text-align: center">{{ forloop.counter }}</td>
+                    <td>{{ v.4 }}</td>
+                    <td  style="text-align: center">{{ v.0 }}</td>
+                    <td style="text-align: right">$ {{ v.1|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.2|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.3|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title1 }}</div>
+    <div class="panel-body">
+        <div id="contenido1" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title2 }}</div>
+    <div class="panel-body">
+        <div id="contenido2" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title2 }}</div>
+    <div class="panel-body">
+        <div id="contenido3" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+

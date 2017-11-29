@@ -1,0 +1,14 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $("#id_valoracion").addClass("validate[required]");
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/panelclientes?action=cliente_servicios_recibidos&id={{ cliente.id }}{% endblock %}
+{% block formdestination %}/panelclientes?action=cliente_servicios_recibidos&id={{ cliente.id }}{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='valorar_servicio'/>
+    <input type='hidden' name='id' value='{{ detalle_factura.id }}'/>
+{% endblock %}
+{% block formback %}/panelclientes?action=cliente_servicios_recibidos&id={{ cliente.id }}{% endblock %}

@@ -1,0 +1,219 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            $("#porciento_cliente_normal, #porciento_cliente_corporativo, #porciento_cliente_vip").blur(function () {
+                numerico($(this), 0, 100, 2);
+                calcular_valores();
+            });
+
+            calcular_valores = function () {
+                var precio_cliente_normal = parseFloat($("#precio_cliente_normal").html());
+                var precio_cliente_corporativo = parseFloat($("#precio_cliente_corporativo").html());
+                var precio_cliente_vip = parseFloat($("#precio_cliente_vip").html());
+
+                var porciento_cliente_normal = parseFloat($("#porciento_cliente_normal").val());
+                var porciento_cliente_corporativo = parseFloat($("#porciento_cliente_corporativo").val());
+                var porciento_cliente_vip = parseFloat($("#porciento_cliente_vip").val());
+
+                bloqueointerface();
+                $.ajax({
+                    type: "POST",
+                    url: "/paquetes",
+                    data: {
+                        'action': 'valor_precios_clientes',
+                        'pid': '{{ paquete.id }}',
+                        'precio_cliente_normal': precio_cliente_normal,
+                        'precio_cliente_corporativo': precio_cliente_corporativo,
+                        'precio_cliente_vip': precio_cliente_vip,
+                        'porciento_cliente_normal': porciento_cliente_normal,
+                        'porciento_cliente_corporativo': porciento_cliente_corporativo,
+                        'porciento_cliente_vip': porciento_cliente_vip
+                    },
+                    success: function(data) {
+                        $.unblockUI();
+                        if (data.result == 'ok') {
+                            $("#valor_cliente_normal").html(data.valor_cliente_normal.toFixed(2));
+                            $("#valor_cliente_corporativo").html(data.valor_cliente_corporativo.toFixed(2));
+                            $("#valor_cliente_vip").html(data.valor_cliente_vip.toFixed(2));
+                        } else {
+                            $("#valor_cliente_normal").html("0.00");
+                            $("#valor_cliente_corporativo").html("0.00");
+                            $("#valor_cliente_vip").html("0.00");
+                            smoke.alert(data.mensaje);
+                        }
+                    },
+                    error: function() {
+                        $.unblockUI();
+                        smoke.alert("Error al enviar los datos.");
+                    },
+                    dataType: "json"
+                });
+            };
+
+            //Activar pestana
+            $("#pestana14").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+        <div class="span10">
+            <h4>{{ title }} {{ paquete.nombre_corto }}</h4>
+        </div>
+        <div class="span2 atright">
+            <a href="/paquetes" class="btn btn-default btn-form"><i class="fa fa-arrow-left"></i> Atr&aacute;s</a>
+        </div>
+    </div>
+    <br/>
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="span6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>Productos {% if paquete.cantidad_productos %}({{ paquete.cantidad_productos|floatformat:0 }}){% endif %}</h5>
+                    </div>
+                    <div class="panel-body">
+                        <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                            <thead>
+                            <tr>
+                                <th style="width: 100px">C&oacute;digo</th>
+                                <th>Descripci&oacute;n</th>
+                                <th style="width: 40px; text-align: center">U.M.</th>
+                                <th style="width: 200px">Categor&iacute;a</th>
+                                <th style="width: 40px"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for r in paquete.mis_productos %}
+                                <tr>
+                                    <td>{{ r.producto.codigo }}</td>
+                                    <td>{{ r.producto.descripcion }}</td>
+                                    <td style="text-align: center">{{ r.producto.unidadmedida }}</td>
+                                    <td>{{ r.producto.tipoproducto.nombre }}</td>
+                                    <td style="text-align: center">
+                                        <a class="list-group-item btn btn-danger btn-mini btn-form tl" title="Eliminar" href="/paquetes?action=deleteelementoproducto&id={{ r.id }}"><i class="fa fa-times fa-fw"></i></a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="10">
+                                        No existen productos para el paquete
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="10">
+                                    <a href="/paquetes?action=addelementoproducto&id={{ paquete.id }}" style="margin: 0.5em" class="btn btn-turquesa btn-form tl" title="Adicionar"><i class="fa fa-plus"></i></a>
+                                </td>
+                            </tr>
+                            </tfoot>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="span6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>Servicios {% if paquete.cantidad_servicios %}({{ paquete.cantidad_servicios|floatformat:0 }}){% endif %}</h5>
+                    </div>
+                    <div class="panel-body">
+                        <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                            <thead>
+                            <tr>
+                                <th style="width: 100px">C&oacute;digo</th>
+                                <th>Descripci&oacute;n</th>
+                                <th style="width: 40px; text-align: center">U.M.</th>
+                                <th style="width: 200px">Categor&iacute;a</th>
+                                <th style="width: 40px"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for r in paquete.mis_servicios %}
+                                <tr>
+                                    <td>{{ r.servicio.codigo }}</td>
+                                    <td>{{ r.servicio.descripcion }}</td>
+                                    <td style="text-align: center">{{ r.servicio.unidadmedida }}</td>
+                                    <td>{{ r.servicio.tiposervicio.nombre }}</td>
+                                    <td style="text-align: center">
+                                        <a class="list-group-item btn btn-danger btn-mini btn-form tl" title="Eliminar" href="/paquetes?action=deleteelementoservicio&id={{ r.id }}"><i class="fa fa-times fa-fw"></i></a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="10">
+                                        No existen servicios para el paquete
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="10">
+                                    <a href="/paquetes?action=addelementoservicio&id={{ paquete.id }}" style="margin: 0.5em" class="btn btn-turquesa btn-form tl" title="Adicionar"><i class="fa fa-plus"></i></a>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    {% if paquete.precio %}
+        <div class="row-fluid">
+            <div class="span1"></div>
+            <div class="span10">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th colspan="10" style="text-align: center">Tabla de precios calculados y porcientos de descuentos por tipos de clientes</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 50px; text-align: center">Prec. Ref</th>
+                        <th style="width: 50px; text-align: center">Prec. Norm.</th>
+                        <th style="width: 50px; text-align: center">% Prec. Norm.</th>
+                        <th style="width: 50px; text-align: center">Valor Norm.</th>
+                        <th style="width: 50px; text-align: center">Prec. Corp.</th>
+                        <th style="width: 50px; text-align: center">% Prec. Corp.</th>
+                        <th style="width: 50px; text-align: center">Valor Corp.</th>
+                        <th style="width: 50px; text-align: center">Prec. Vip</th>
+                        <th style="width: 50px; text-align: center">% Prec. Vip</th>
+                        <th style="width: 50px; text-align: center">Valor Vip</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="larger" style="text-align: center; vertical-align: middle">{{ paquete.precio|floatformat:2 }}</td>
+                        <td class="larger" style="text-align: center; vertical-align: middle" id="precio_cliente_normal">{{ paquete.precio_cliente_normal|floatformat:2 }}</td>
+                        <td style="text-align: center">
+                            <input type="text" style="margin-top: 0.5em; width: 70px" id="porciento_cliente_normal" value="{{ paquete.porciento_cliente_normal|floatformat:2 }}" class="imp-50 atright"/>
+                        </td>
+                        <td class="larger" style="text-align: center; vertical-align: middle" id="valor_cliente_normal">{{ paquete.valor_cliente_normal|floatformat:2 }}</td>
+                        <td class="larger" style="text-align: center; vertical-align: middle" id="precio_cliente_corporativo">{{ paquete.precio_cliente_corporativo|floatformat:2 }}</td>
+                        <td style="text-align: center">
+                            <input type="text" style="margin-top: 0.5em; width: 70px" id="porciento_cliente_corporativo" value="{{ paquete.porciento_cliente_corporativo|floatformat:2 }}" class="imp-50 atright"/>
+                        </td>
+                        <td class="larger" style="text-align: center; vertical-align: middle" id="valor_cliente_corporativo">{{ paquete.valor_cliente_corporativo|floatformat:2 }}</td>
+                        <td class="larger" style="text-align: center; vertical-align: middle" id="precio_cliente_vip">{{ paquete.precio_cliente_vip|floatformat:2 }}</td>
+                        <td style="text-align: center">
+                            <input type="text" style="margin-top: 0.5em; width: 70px" id="porciento_cliente_vip" value="{{ paquete.porciento_cliente_vip|floatformat:2 }}" class="imp-50 atright"/>
+                        </td>
+                        <td class="larger" style="text-align: center; vertical-align: middle" id="valor_cliente_vip">{{ paquete.valor_cliente_vip|floatformat:2 }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="span1"></div>
+        </div>
+    {% endif %}
+
+{% endblock %}
+

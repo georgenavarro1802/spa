@@ -1,0 +1,21 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_fechadepositado").addClass("validate[required]").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/consultas{% endblock %}
+{% block formwidth %}form-s{% endblock %}
+{% block formdestination %}/consultas?tab=3{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='depositar_cheque'/>
+    <input type='hidden' name='id' value='{{ pago.id }}'/>
+{% endblock %}
+{% block formback %}/consultas?tab=3{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

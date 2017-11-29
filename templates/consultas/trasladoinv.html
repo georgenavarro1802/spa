@@ -1,0 +1,21 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_area").addClass("validate[required]");
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/consultas{% endblock %}
+{% block formwidth %}form-m{% endblock %}
+{% block formdestination %}/consultas?tab=4{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='trasladoinv'/>
+    <input type='hidden' name='id' value='{{ inventario.id }}'/>
+{% endblock %}
+{% block formback %}/consultas?tab=4{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

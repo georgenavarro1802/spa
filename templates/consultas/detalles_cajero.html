@@ -1,0 +1,183 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Detalles pagos
+            $("#detalles_pagos_cajero .btn-aceptar").click(function(){
+                $("#detalles_pagos_cajero").modal("hide");
+                return false;
+            });
+
+            $(".btn-pagos").click(function(){
+                bloqueointerface();
+                var fid = $(this).attr('fid');
+                $('#detalle_pagos').empty();
+                $("tr").removeClass('marcado');
+                $(this).parent().parent().addClass('marcado');
+                $.post("/consultas", {'action': 'detalles_pagos_cajero', 'fid': fid}, function(data){
+                    $.unblockUI();
+                    $("#numero_factura").html(data.numerofactura);
+                    $("#cliente_factura").html(data.clientefactura);
+                    for (i in data.pagos){
+                        var pago = data.pagos[i];
+                        $('#detalle_pagos').append("<tr>" +
+                                "<td style='text-align: center'>"+pago[0]+"</td>" +
+                                "<td>"+pago[1]+"</td>" +
+                                "<td style='text-align: center'>$ "+pago[2].toFixed(2)+"</td>" +
+                                "<td>"+pago[3]+"</td>" +
+                                "</tr>");
+                        $('#detalle_pagos_totales').html("<tr>" +
+                                "<td colspan='2'></td>" +
+                                "<td class='marcado' style='text-align: center'>$ "+data.totalpagado.toFixed(2)+"</td>" +
+                                "<td></td>" +
+                                "</tr>");
+                        $("#detalles_pagos_cajero").modal({"backdrop":"static", "width": "800px"}).modal("show");
+                    }
+                }, "json");
+                return false;
+            });
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+        <div class="span10">
+            <h3>cajero: {{ cajero.nombre }}</h3>
+        </div>
+        <div class="span2 atright">
+            <a href="/consultas?action=consulta_cajeros" class="btn btn-default btn-form"><i class="fa fa-arrow-left"></i> Atr&aacute;s</a>
+        </div>
+    </div>
+    <br/>
+    <div class="row-fluid">
+        <div class='span6'>
+            <div class="panel panel-primary">
+                <div class="panel-heading">Facturas Pendientes</div>
+                <div class="panel-body">
+                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th style="width: 70px">Factura</th>
+                            <th style="width: 80px; text-align: center">Fecha</th>
+                            <th>Cliente</th>
+                            <th style="width: 70px; text-align: center">Facturado</th>
+                            <th style="width: 70px; text-align: center">Comisi&oacute;n</th>
+                            <th style="width: 70px; text-align: center">Pagado</th>
+                            <th style="width: 70px; text-align: center">Pendiente</th>
+                            <th style="width: 30px"> </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for f in cajero.facturas_pendientes %}
+                            <tr>
+                                <td>{{ f.numero }}</td>
+                                <td style="text-align: center">{{ f.fecha|date:'d-m-Y' }}</td>
+                                <td>
+                                    {{ f.cliente.nombre }}
+                                </td>
+                                <td style="text-align: center">$ {{ f.total|floatformat:2 }}</td>
+                                <td style="text-align: center">$ {{ f.valor_comision|floatformat:2 }}</td>
+                                <td style="text-align: center">$ {{ f.pagado|floatformat:2 }}</td>
+                                <td style="text-align: center">$ {{ f.saldo_pendiente|floatformat:2 }}</td>
+                                <td style="text-align: center">
+                                    {% if f.pagado %}
+                                        <a href="#" class="btn btn-success btn-tini btn-pagos tl" title="Pagos asociados" fid="{{ f.id }}"><i class="fa fa-money"></i></a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="10">
+                                    No existen ventas del cajero seleccionado
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class='span6'>
+            <div class="panel panel-primary">
+                <div class="panel-heading">Facturas Pagadas</div>
+                <div class="panel-body">
+                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th style="width: 70px">Factura</th>
+                            <th style="width: 90px; text-align: center">Fecha</th>
+                            <th>Cliente</th>
+                            <th style="width: 70px; text-align: center">Facturado</th>
+                            <th style="width: 70px; text-align: center">Comisi&oacute;n</th>
+                            <th style="width: 70px; text-align: center">Pagado</th>
+                            <th style="width: 30px"> </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for f in cajero.facturas_pagadas %}
+                            <tr>
+                                <td>{{ f.numero }}</td>
+                                <td style="text-align: center">{{ f.fecha|date:'d-m-Y' }}</td>
+                                <td>
+                                    {{ f.cliente.nombre }}
+                                </td>
+                                <td style="text-align: center">$ {{ f.total|floatformat:2 }}</td>
+                                <td style="text-align: center">$ {{ f.valor_comision|floatformat:2 }}</td>
+                                <td style="text-align: center">$ {{ f.pagado|floatformat:2 }}</td>
+                                <td style="text-align: center">
+                                    {% if f.pagado %}
+                                        <a href="#" class="btn btn-success btn-tini btn-pagos tl" title="Pagos asociados" fid="{{ f.id }}"><i class="fa fa-money"></i></a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="10">
+                                    No existen ventas del cajero seleccionado
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}
+
+{% block moreblock %}
+
+    <div class="modal fade static" id="detalles_pagos_cajero" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Pagos relacionados con la factura # <span style="font-weight: bold" id="numero_factura"></span> (<span style="font-weight: bold" id="cliente_factura"></span>)</h3>
+        </div>
+        <div class="modal-body">
+            <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th style="width: 80px; text-align: center">Fecha</th>
+                    <th>Forma Pago</th>
+                    <th style="width: 80px; text-align: center">Pagado</th>
+                    <th style="width: 450px">Informaci&oacute;n</th>
+                </tr>
+                </thead>
+                <tbody id="detalle_pagos"></tbody>
+                <tfoot id="detalle_pagos_totales"></tfoot>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

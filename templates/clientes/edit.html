@@ -1,0 +1,63 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <style>
+        #formulary table td input#id_email { text-transform: none; }
+    </style>
+    <script>
+        $(function(){
+            $("#id_identificacion, #id_nombre, #id_usuario").addClass("validate[required]");
+
+            $("#id_fecha_nacimiento").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+            //Activar pestana
+            $("#pestana4").addClass('current');
+
+            actualizar_form = function(){
+                var tipo = $("#id_tipo").val();
+                // cliente corporativo
+                if (tipo == 2){
+                    $(".corporativo").show();
+                    $(".especifico").show();
+                    $(".foto").show();
+                    $("#id_ruc, #id_razon_social, #id_representante_legal").parent().parent().show();
+                    $("#id_tipo_cabello, #id_tipo_piel, #id_caracteristicas_fisicas, #id_alergias, #id_oportunidades_servicios").parent().parent().show();
+                    $("#id_foto").parent().parent().show();
+                }
+                // cliente vip
+                else if (tipo == 3){
+                    $(".corporativo").hide();
+                    $(".especifico").show();
+                    $(".foto").show();
+                    $("#id_ruc, #id_razon_social, #id_representante_legal").parent().parent().hide();
+                    $("#id_tipo_cabello, #id_tipo_piel, #id_caracteristicas_fisicas, #id_alergias, #id_oportunidades_servicios").parent().parent().show();
+                    $("#id_foto").parent().parent().show();
+                }
+
+                // cliente normal
+                else{
+                    $(".corporativo").hide();
+                    $(".especifico").hide();
+                    $(".foto").hide();
+                    $("#id_ruc, #id_razon_social, #id_representante_legal").parent().parent().hide();
+                    $("#id_tipo_cabello, #id_tipo_piel, #id_caracteristicas_fisicas, #id_alergias, #id_oportunidades_servicios").parent().parent().hide();
+                    $("#id_foto").parent().parent().hide();
+                }
+
+                return false;
+            };
+
+            $("#id_tipo").change(actualizar_form);
+            actualizar_form();
+        });
+
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }} {{ cliente }}{% endblock %}
+{% block formaction %}/clientes{% endblock %}
+{% block formdestination %}/clientes{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='edit'/>
+    <input type='hidden' name='id' value='{{ cliente.id }}'/>
+{% endblock %}
+{% block formback %}/clientes{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

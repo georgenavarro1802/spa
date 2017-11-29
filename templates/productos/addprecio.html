@@ -1,0 +1,43 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+
+            $("#id_cantidad_minima, #id_cantidad_maxima, #id_porciento_costo, #id_porciento_precio").blur(function(){
+                numerico($(this), -999999, 999999, 2);
+            });
+            $('#id_observaciones').css({'text-transform': 'none'});
+
+            $("#id_porciento_precio").val('0.00').attr({'disabled': true});
+
+            $("#id_precio_sobre_costo").click(function(){
+                if ($(this).is(':checked')) {
+                    $("#id_porciento_costo").attr({'disabled': false});
+                    $("#id_porciento_precio").val('0.00').attr({'disabled': true});
+                    $("#id_precio_sobre_precio").attr({'checked': false});
+                }
+            });
+
+            $("#id_precio_sobre_precio").click(function(){
+                if ($(this).is(':checked')) {
+                    $("#id_porciento_costo").attr({'disabled': true});
+                    $("#id_porciento_precio").val('0.00').attr({'disabled': false});
+                    $("#id_precio_sobre_costo").attr({'checked': false});
+                }
+            });
+
+            //Activar pestana
+            $("#pestana2").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formwidth %}form-m{% endblock %}
+{% block formaction %}/productos?action=precios&id={{ producto.id }}{% endblock %}
+{% block formdestination %}/productos?action=precios&id={{ producto.id }}{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='addprecio'/>
+    <input type='hidden' name='id' value='{{ producto.id }}'/>
+{% endblock %}
+{% block formback %}/productos?action=precios&id={{ producto.id }}{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

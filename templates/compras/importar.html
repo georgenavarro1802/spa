@@ -1,0 +1,18 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script type="text/javascript">
+        $(function(){
+            $("#id_archivo, #id_proveedor").addClass("validate[required]");
+        });
+    </script>
+{% endblock %}
+{% block atras %}/compras{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/compras{% endblock %}
+{% block formdestination %}/consultas?action=consulta_inventarios{% endblock %}
+{% block formwidth %}form-m{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='importar'/>
+{% endblock %}
+{% block formback %}/compras{% endblock %}
+{% block buttonname %}Importar{% endblock %}

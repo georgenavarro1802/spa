@@ -1,0 +1,527 @@
+<script>
+
+    $(function() {
+
+        $('#ruccliente').mask('9999999999?9999999999999');
+        $('#telefonocliente').mask('999999?9999999999');
+        $("#id_tipo").addClass("input-large");
+        $("#id_ruc, #id_telefono").addClass("input-small");
+
+        $("#fechafactura").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+        actualizar_form_tipocliente = function(tipocliente){
+            if (tipocliente == '1'){ //consumidor final
+                $("#datosclientes input").val('');
+                $("#datosclientes input").attr('disabled', true);
+            }else{
+                $("#datosclientes input").attr('disabled', false);
+            }
+            $("#tipocliente").val(tipocliente);
+        };
+
+        $(".tiposclientes").click(function(){
+            var tipocli = $(this).attr("value");
+            $(".tiposclientes").removeClass("btn-success");
+            $(this).addClass("btn-success");
+            actualizar_form_tipocliente(tipocli);
+        });
+
+        actualizar_form_tipocliente('2'); //inicializar con consumidor final
+
+
+        actualizar_datos_cliente = function(ruc){
+            $.post("/", {'action': 'datoscliente', 'ruccliente': ruc}, function(data){
+                if (data.result=='ok'){
+                    $("#ruccliente").val(data.ruc);
+                    $("#nombrecliente").val(data.nombre);
+                    $("#telefonocliente").val(data.telefono);
+                    $("#ciudadcliente").val(data.ciudad);
+                    $("#direccioncliente").val(data.direccion);
+                    $("#emailcliente").val(data.email);
+                }else{
+                    $("#nombrecliente").val("");
+                    $("#ciudadcliente").val("");
+                    $("#telefonocliente").val("");
+                    $("#direccioncliente").val("");
+                    $("#emailcliente").val("");
+                }
+            }, "json");
+        };
+
+        buscar_cliente = function(query, process) {
+            $.get("/get_data", {'model': 'Cliente','p': 1, 'q': query, 's': 10}, function(data) {
+                if (data.results) {
+                    $("#nombrecliente").get(0).results = data.results;
+                    listing = [];
+                    for (var i in data.results) {
+                        var dato = data.results[i];
+                        listing.push(dato.name);
+                    }
+                    process(listing);
+                }
+            }, 'json');
+        };
+
+        $('#nombrecliente').typeahead({source: buscar_cliente, updater: function(item) {
+            var elem = $("#nombrecliente");
+            var results = elem.get(0).results;
+            for (var i in results) {
+                var datos = results[i];
+                if (item==datos.name) {
+                    elem.attr("myval", datos.id);
+                    elem.attr("alias", datos.alias);
+                    actualizar_datos_cliente(datos.alias[0]);
+                }
+            }
+            return item;
+        }
+        });
+
+
+        $("#ruccliente").blur(function(){
+            var ruc = $("#ruccliente").val();
+            actualizar_datos_cliente(ruc);
+            return false;
+        });
+
+        ////////////////// PRODUCTOS //////////////////////////
+        eliminarItem = function() {
+            var index = $(this).attr("index");
+            items.productos[index].cantidad -= 1;
+            items.productos[index].valor -= items.productos[index].pvpproducto;
+            if (items.productos[index].cantidad == 0){
+                items.productos.splice(index,1);
+            }
+            updateItems();
+            return false;
+        };
+
+        // Actualizar tabla de productos
+        updateItems = function() {
+            var subtotal = 0;
+            var iva = 0;
+            var total = 0;
+            if (items.productos.length == 0) {
+                $("#listaprod").html("<tr><td></td><td colspan='10'><i>Seleccione productos para la venta</i></td></tr>");
+                $("#subtotalvalor").html("0.00");
+                $("#ivavalor").html("0.00");
+                $("#totalvalor").html("0.00");
+                $("#confirmar").hide();
+                $("#cancelar").hide();
+            } else {
+                $("#listaprod").empty();
+                var sum = 0;
+                for (var i in items.productos) {
+                    var item = items.productos[i];
+                    $("#listaprod").append("<tr>" +
+                            "<td style='text-align: center'><a href='#' class='btn btn-danger btn-tini btn-mini eliminaritem' index='"+i+"'><i class='fa fa-minus'></i> </a></td>" +
+                            "<td>"+item.nombreproducto+"</td>" +
+                            "<td>"+item.proveedorproducto+"</td>" +
+                            "<td class='larger' style='text-align: center'><a id='itemcantidad"+i+"' class='adicionarcantidad' href='#' index='"+i+"'>"+item.cantidad+"</a></td>" +
+                            "<td class='larger' style='text-align: right'>$ "+item.pvpproducto.toFixed(2)+"</td>" +
+                            "<td class='larger' style='text-align: right' id='itemvalor"+i+"'>$ "+item.valor.toFixed(2)+"</td>" +
+                            "</tr>");
+                    sum = sum + item.valor;
+                }
+                subtotal = sum;
+                iva = Math.round((subtotal * {{ iva }})*100)/100;
+                total =  Math.round((subtotal + iva) *100)/100;
+                $("#listaprod").find(".eliminaritem").click(eliminarItem);
+                $("#listaprod").find(".adicionarcantidad").click(function(){
+                    $("#input-number").val("");
+                    $("#indice").val($(this).attr('index'));
+                    $("#cantidadpanel").modal({'backdrop':'static', 'width': '330px', 'height': '450px'}).modal("show");
+                });
+                $("#subtotalvalor").html(subtotal.toFixed(2));
+                $("#ivavalor").html(iva.toFixed(2));
+                $("#totalvalor").html(total.toFixed(2));
+            }
+        };
+
+        /////////////////////////// FUNCION PRINCIPAL ///////////////////////////////
+        $(".iconprod").click(function(){
+            var idprod = $(this).attr("idprod");
+            var codprod = $(this).attr("codprod");
+            var proveedorprod = $(this).attr("prov");
+            var nombreprod = $(this).attr("nombreprod");
+            var invprod = parseFloat($(this).attr("invprod"));
+            var pvpprod = parseFloat($(this).attr("pvpprod"));
+            var fotoprod = $(this).attr("fotoprod");
+            var aliasprod = $(this).attr("aliasprod");
+            var flat = false;
+            var item = {};
+            var subtotal = 0;
+            var iva = 0;
+            if (items.productos.length > 0){
+                for (var i in items.productos) {
+                    var itemp = items.productos[i];
+
+                    if (codprod == itemp.codproducto){
+                        if (itemp.cantidad + 1 > itemp.invproducto){
+                            notificarAlerta('Alerta', 'Ha sobrepasado la cantidad disponible en inventario', 'Cerrar', cerrarNotificacionPanel);
+                            flat = true;
+                            break;
+                        }
+                        itemp.cantidad += 1;
+                        itemp.valor = Math.round((itemp.cantidad * itemp.pvpproducto)*100)/100;
+                        flat = true;
+                    }
+                }
+            }
+            if (!flat){
+                item.codproducto = codprod;
+                item.proveedorproducto = proveedorprod;
+                item.nombreproducto = nombreprod;
+                item.aliasproducto = aliasprod;
+                item.cantidad = 1;
+                item.pvpproducto = pvpprod;
+                item.invproducto = invprod;
+
+                item.valor = Math.round((item.cantidad * item.pvpproducto)*100)/100;
+                subtotal = item.valor;
+                iva = Math.round((subtotal * iva)*100)/100;
+                item.subtotal = subtotal;
+                item.iva = iva;
+
+                items.productos.push(item);
+
+                $("#confirmar").show();
+                $("#cancelar").show();
+            }
+
+            updateItems();
+            return false;
+        });
+
+        datoscli = true;
+
+        function reiniciar_pagina(){
+            location.href = '/';
+        }
+
+        // SOLICITUD PANEL
+        $("#btn-solicitar").click(function(){
+
+            {% if es_vendedor %}
+                var ruccli = $("#ruccliente").val();
+                var nombrecli = $("#nombrecliente").val();
+
+                items.subtotal = $("#subtotal").text().replace('$','').trim();
+                items.iva = $("#iva").text().replace('$','').trim();
+                items.total = $("#total").text().replace('$','').trim();
+                items.observacionesfactura = $("#observacionesfactura").val();
+
+                if (ruccli && nombrecli){
+                    items.ruccliente = ruccli;
+                    items.nombrecliente = nombrecli;
+                    items.direccioncliente = $("#direccioncliente").val();
+                    items.ciudadcliente = $("#ciudadcliente").val();
+                    items.telefonocliente = $("#telefonocliente").val();
+                    items.emailcliente = $("#emailcliente").val();
+                    datoscli = true;
+                }else{
+                    datoscli = false;
+                }
+
+            {% else %}
+
+                items.subtotal = parseFloat($("#subtotalvalor").html());
+                items.iva = parseFloat($("#ivavalor").html());
+                items.total = parseFloat($("#totalvalor").html());
+                items.observacionesfactura = "";
+
+            {% endif %}
+
+            if (datoscli){
+                $.post("/", {'action': 'guardar', "items": JSON.stringify(items), 'productos': JSON.stringify(items.productos)}, function(data){
+                    $("#facturapanel").modal("hide");
+                    $("#alertacliente").hide();
+                    if (data.result=='ok'){
+                        {% if es_vendedor %}
+                            notificarInfo('Solicitud generada por el cliente', 'Se ha generado con &eacute;xito la solicitud de compra #'+data.solicitud+'. Gracias por preferirnos!');
+                        {% else %}
+                            notificarInfo('Solicitud generada por el vendedor', 'Se ha generado con &eacute;xito la solicitud de compra #'+data.solicitud+'.');
+                        {% endif %}
+                        setTimeout(reiniciar_pagina, 2000);
+                    }else{
+                        notificarAlerta('Alerta', data.mensaje, 'Cerrar', cerrarNotificacionPanel);
+                    }
+                }, "json");
+            }else{
+                $("#alertacliente").show();
+            }
+        });
+
+        $("#facturapanel .btn-cancelar").click(function(){
+            $("#facturapanel").modal("hide");
+            return false;
+        });
+
+        //Botones de Confirmar o Cancelar
+        $("#confirmar").click(function(){
+            var vt = parseFloat($("#totalvalor").html());
+            var subtotal = parseFloat($("#subtotalvalor").html());
+            var iva = parseFloat($("#ivavalor").html());
+            $("#subtotal").html("$ "+subtotal.toFixed(2));
+            $("#iva").html("$ "+iva.toFixed(2));
+            $("#total").html("$ "+vt.toFixed(2));
+            {% if es_vendedor %}
+                $("#facturapanel").modal({'backdrop':'static', 'width': '800px', 'height': '350px'}).modal("show");
+            {% else %}
+                $("#facturapanel").modal({'backdrop':'static', 'width': '600px', 'height': '150px'}).modal("show");
+            {% endif %}
+            return false;
+        });
+
+        $("#cancelar").click(function(){
+            location.reload();
+        });
+
+        {# NUMPAD PARA CANTIDADES #}
+        $("#cantidadpanel .btn-cancelar").click(function(){
+            $("#cantidadpanel").modal("hide");
+            return false;
+        });
+
+        $("#cantidadpanel .btn-cantidad").click(function(){
+            var cantidad = $("#input-number").val();
+            var indice = $("#indice").val();
+            var sum = 0;
+            var subtotal = 0;
+            var iva = 0;
+            var total = 0;
+            var itemp = items.productos[indice];
+
+            if (cantidad > itemp.invproducto){
+                notificarAlerta('Alerta', 'Ha sobrepasado la cantidad disponible en inventario', 'Cerrar', cerrarNotificacionPanel);
+            }else{
+                itemp.cantidad = cantidad;
+                itemp.valor = Math.round((itemp.cantidad * itemp.pvpproducto)*100)/100;
+                $("#itemcantidad"+indice).html(itemp.cantidad);
+                $("#itemvalor"+indice).html("$ " + itemp.valor.toFixed(2));
+            }
+
+            for (var i in items.productos) {
+                var item = items.productos[i];
+                sum = sum + item.valor;
+            }
+            subtotal = sum;
+            iva = Math.round((subtotal * {{ iva }})*100)/100;
+            total =  Math.round((subtotal + iva) *100)/100;
+            $("#subtotalvalor").html(subtotal.toFixed(2));
+            $("#ivavalor").html(iva.toFixed(2));
+            $("#totalvalor").html(total.toFixed(2));
+
+            $("#cantidadpanel").modal("hide");
+
+            return false;
+        });
+
+        $('.numsel').click(function(){
+            var elem = $("#input-number");
+            var temp = '';
+            var num = '';
+            if($(this).attr('rel') != "-1"){
+                num = $(this).attr('rel');
+                temp = elem.val() + num;
+                elem.val(temp);
+            }else{
+                temp = elem.val();
+                temp = temp.slice(0, temp.length-1);
+                elem.val(temp);
+            }
+        });
+
+        $(".tl").tooltip({placement:"top"});
+
+    });
+
+</script>
+
+{% for inv in productos_existencias %}
+    <div class='iconprod' style="margin-bottom: 150px" id='icon{{ inv.producto.codigo }}' prov="{{ inv.producto.proveedor.nombre }}" idprod='{{ inv.producto.id }}' codprod="{{ inv.producto.codigo }}" nombreprod="{{ inv.producto.nombre_corto }}" invprod="{{ inv.cantidad|floatformat:0 }}" pvpprod="{{ inv.producto.precio|floatformat:2 }}" fotoprod="{{ inv.producto.download_foto }}" aliasprod="{{ inv.producto.alias }}">
+        <table style="border: 1px solid #000">
+            <thead style="height: 30px">
+            <tr style="border-bottom: 1px solid #000">
+                <th style="text-align: left; width: 150px">{{ inv.producto.codigo }}</th>
+                <th style="text-align: right; border-left: 1px solid #000">${{ inv.producto.precio|floatformat:2 }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="height: 30px">
+                <td style="text-align: left">
+                    <img src='{% if inv.producto.proveedor.logo %}{{ inv.producto.proveedor.download_logo }}{% endif %}' alt='' border="0" width="60px" height="10px"/>
+                </td>
+                <td style="text-align: right">
+                    <label class="badge {% if inv.cantidad < inv.producto.minimo %}badge-important{% else %}badge-success{% endif %}"> {{ inv.cantidad|floatformat:0 }}</label>
+                </td>
+            </tr>
+            <tr style="height: 150px">
+                <td colspan="2" style="text-align: center">
+                    <a href="#" class="tl" title="{{ inv.producto.descripcion }}">
+                        <img src='{{ inv.producto.download_foto }}' border="0" width="110px" height="90px"/>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <table style="border: 1px solid #000">
+            <tr style="background-color: lightblue">
+                <td style="text-align: center; font-size: 8px">
+                    {{ inv.producto.descripcion }}
+                    {% for f in inv.producto.cantidad_filas_puntos_descripcion_catalogo %}
+                        <br><span style="color: lightblue">......</span>
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+    </div>
+{% empty %}
+    <div class="alert alert-danger">
+        <h5><i class="fa fa-info-circle"></i> No existen productos con existencias en la categor&iacute;a: {% if favoritos %}FAVORITOS{% endif %}{% if tipoprod %}{{ tipoprod.nombre }}{% endif %}</h5>
+    </div>
+{% endfor %}
+
+
+{% block moreblock %}
+    {#  MODAL - SOLICITUD  #}
+    <div class="modal fade static" id="facturapanel" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Confirmaci&oacute;n de la solicitud</h3>
+        </div>
+        <div class="modal-body panel-body">
+            {% if es_vendedor %}
+                <div class="alert alert-danger" id="alertacliente" style="display: none; margin-top: 10px">
+                    <span><strong>Error</strong>, revise el formulario de cliente, los campos <b>ruc/ced</b> y <b>nombre</b> son obligatorios</span>
+                </div>
+                <div style="width: 770px; margin-top: 10px">
+                    <table id='datosclientes' class="well table table-condensed">
+                        <tbody>
+                        <tr style="font-weight: bold">
+                            <td style="width: 50px; vertical-align: middle">
+                                Ruc/Ced:
+                            </td>
+                            <td style="width: 150px">
+                                <input type="text" style="margin-top: 10px; text-transform: uppercase" class="input-block-level" id='ruccliente' myval=""/>
+                            </td>
+                            <td style="width: 50px; vertical-align: middle">
+                                Nombre:
+                            </td>
+                            <td style="width: 450px">
+                                <input type="text" style="margin-top: 10px; text-transform: uppercase" class="input-block-level" id='nombrecliente'/>
+                            </td>
+                        </tr>
+                        <tr style="font-weight: bold">
+                            <td style="width: 50px; vertical-align: middle">
+                                Ciudad:
+                            </td>
+                            <td style="width: 150px">
+                                <input type="text" style="margin-top: 10px; text-transform: uppercase" class="input-block-level" id='ciudadcliente'/>
+                            </td>
+                            <td style="width: 50px; vertical-align: middle">
+                                Direcci&oacute;n:
+                            </td>
+                            <td style="width: 450px">
+                                <input type="text" style="margin-top: 10px; text-transform: uppercase" class="input-block-level" id='direccioncliente'/>
+                            </td>
+                        </tr>
+                        <tr style="font-weight: bold">
+                            <td style="width: 50px; vertical-align: middle">
+                                Tel&eacute;fono:
+                            </td>
+                            <td style="width: 150px">
+                                <input type="text" style="margin-top: 10px; text-transform: uppercase" class="input-block-level" id='telefonocliente'/>
+                            </td>
+                            <td style="width: 50px; vertical-align: middle">
+                                Email:
+                            </td>
+                            <td style="width: 450px">
+                                <input type="text" style="margin-top: 10px; text-transform: lowercase" class="input-block-level" id='emailcliente'/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="width: 500px; float: left; margin-top: 10px">
+                    <form>
+                        <label for="observacionesfactura" style="font-weight: bold">Observaciones:</label>
+                        <textarea rows="3" cols="30" class="input-block-level" style="text-transform: none" id='observacionesfactura'></textarea>
+                    </form>
+                </div>
+                <div style="width: 250px; float: right; margin-top: 10px">
+                    <br/>
+                    <table class="well table table-condensed">
+                        <tbody>
+                        <tr style="font-weight: bold">
+                            <td style="width: 60px; vertical-align: middle">
+                                Subtotal:
+                            </td>
+                            <td style="width: 80px; text-align: right" class="larger">
+                                <span id='subtotal'>$ 0.00</span>
+                            </td>
+                        </tr>
+                        <tr style="font-weight: bold">
+                            <td style="width: 60px; vertical-align: middle">
+                                Iva:
+                            </td>
+                            <td style="width: 80px; text-align: right" class="larger">
+                                <span id='iva'>$ 0.00</span>
+                            </td>
+                        </tr>
+                        <tr style="font-weight: bold">
+                            <td style="width: 60px; vertical-align: middle">
+                                Total:
+                            </td>
+                            <td style="width: 80px; text-align: right; font-weight: bold" class="bigger">
+                                <span id='total'>$ 0.00</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="font-weight: bold" class="larger">Seguro(a) que desea generar la solicitud de compra? </p><br/>
+                <p style="text-align: justify">El sistema enviar&aacute; un correo electr&oacute;nico autom&aacute;tico a Enliven S.A con el detalle de su solicitud. </p>
+                <p style="text-align: justify">Enliven S.A se pondr&aacute; en contacto con usted (cliente), en cu&aacute;nto analice la solicitud generada y la disponibilidad de sus inventarios.</p>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <a href="#" id='btn-solicitar' class="btn btn-warning"><i class="fa fa-check"></i> Generar Solicitud</a>
+            <a href="#" class="btn btn-cancelar"><i class="fa fa-arrow-left"></i> Cancelar</a>
+        </div>
+    </div>
+
+    {#  NUMPAD PARA CANTIDAD  #}
+    <div class="modal fade static" id="cantidadpanel" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Cantidad</h3>
+        </div>
+        <div class="modal-body panel-body">
+            <div id="container_numpad">
+                <input id="indice" type="hidden" value=""/>
+                <input id="input-number" type="text" placeholder="1234567890"/>
+                <ul class="numpad">
+                    <li class="numsel" rel="1">1</li>
+                    <li class="numsel" rel="2">2</li>
+                    <li class="numsel" rel="3">3</li>
+                    <li class="numsel" rel="4">4</li>
+                    <li class="numsel" rel="5">5</li>
+                    <li class="numsel" rel="6">6</li>
+                    <li class="numsel" rel="7">7</li>
+                    <li class="numsel" rel="8">8</li>
+                    <li class="numsel" rel="9">9</li>
+                    <li class="numsel" rel=".">.</li>
+                    <li class="numsel" rel="0">0</li>
+                    <li class="numsel" rel="-1">C</li>
+                </ul>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn btn-cantidad btn-primary"><i class="fa fa-calculator"></i> Aceptar</a>
+            <a href="#" class="btn btn-cancelar"><i class="fa fa-arrow-left"></i> Cancelar</a>
+        </div>
+    </div>
+
+    {% include "notificacionpanel.html" %}
+
+{% endblock %}

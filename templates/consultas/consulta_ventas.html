@@ -1,0 +1,234 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            // Busqueda en Ventas
+            $("#searchv").click(function() {
+                location.href = "/consultas?action=consulta_ventas&sv="+$("#searchfieldv").val().toUpperCase();
+            });
+            $('#searchfieldv').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchv").trigger("click");
+                }
+            });
+
+            //Detalles factura
+            $("#detalle_factura .btn-aceptar").click(function(){
+                $("#detalle_factura").modal("hide");
+                return false;
+            });
+
+            $(".detallefact").click(function() {
+                var fid = $(this).attr("fid");
+                var num_fact = $(this).attr("num_fact");
+                $.get("/consultas", {'action':'detalle_factura', 'fid': fid}, function(data) {
+                    $("#num_factura").html(num_fact);
+                    $("#exportar_detalle").attr('vid', fid);
+                    $("#detalle_factura .modal-body").html(data);
+                    $("#detalle_factura").modal({"backdrop":"static", "width": "800px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            // Imprimir factura
+            $(".imprimir").click(function(){
+                bloqueointerface();
+                var fid = $(this).attr('fid');
+                $.post("/consultas", {'action': 'imprimir_factura', 'fid': fid}, function(data) {
+                    $.unblockUI();
+                    if (data.result=='ok' && data.reportfile){
+                        window.open(data.reportfile);
+                        location.href = '/consultas?action=consulta_ventas';
+                    }
+                    else{
+                        smoke.alert("Error al intentar imprimir");
+                    }
+                }, "json");
+                return false;
+            });
+
+            $("#exportar_resumen").click(function(){
+                var term = $("#searchfieldv").val().toUpperCase();
+                location.href = '/consultas?action=exportar_resumen_ventas&s='+term;
+            });
+
+            $("#exportar_detalle").click(function(){
+                var vid = $(this).attr('vid');
+                $("#detalle_factura").modal("hide");
+                location.href = '/consultas?action=exportar_detallado_ventas&id='+vid;
+            });
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div>
+                <ul class="nav nav-tabs">
+                    <li style="margin-right: 5px" class="active"><a href="/consultas?action=consulta_ventas" class="btn-form"><h3>Ventas</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_compras" class="btn-form"><h3>Compras</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_pagos" class="btn-form"><h3>Cobros</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_inventarios" class="btn-form"><h3>Inventarios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cajeros" class="btn-form"><h3>Cajeros</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_colaboradores" class="btn-form"><h3>Colaboradores</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cif" class="btn-form"><h3>Historial Costos</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_precios" class="btn-form"><h3>Historial Precios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ordenes_servicio" class="btn-form"><h3>Ordenes Servicio</h3></a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class='row-fluid'>
+                            <div class="panel panel-turquesa">
+                                <div class="panel-heading">
+                                    <div class="row-fluid">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldv' value='{{ searchv }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchv' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchv %}
+                                            <a href="/consultas?action=consulta_ventas" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                        {% if ventas %}
+{#                                            <a href="#" style="float: right" id='exportar_resumen' class='btn btn-warning'><i class="fa fa-file-excel-o"> Exportar</i></a>#}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 50px">Cod.</th>
+                                            <th style="width: 80px">Fecha</th>
+                                            <th style="width: 80px"># Documento</th>
+                                            <th>Cliente</th>
+                                            <th style="width: 70px; text-align: center">SubTotal</th>
+                                            <th style="width: 70px; text-align: center">Iva</th>
+                                            <th style="width: 70px; text-align: center">Total</th>
+                                            <th style="width: 70px; text-align: center">Pagado</th>
+                                            <th style="width: 70px; text-align: center">Pendiente</th>
+                                            <th style="width: 70px; text-align: center">Devol.</th>
+                                            <th style="width: 40px; text-align: center">Items</th>
+                                            <th style="width: 100px; text-align: center">Colaborador</th>
+                                            <th style="width: 80px; text-align: center">Estado</th>
+                                            <th style="width: 80px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for v in ventas %}
+                                            <tr>
+                                                <td>{{ v.repr_id }}</td>
+                                                <td>{{ v.fecha|date:'d-m-Y' }}</td>
+                                                <td>{{ v.numero }}</td>
+                                                <td>{{ v.cliente.nombre }}</td>
+                                                <td style="text-align: center">${{ v.subtotal|floatformat:2 }}</td>
+                                                <td style="text-align: center">${{ v.iva|floatformat:2 }}</td>
+                                                <td style="text-align: center">${{ v.total|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">${{ v.pagado|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">
+                                                    {% if v.saldo_pendiente %}
+                                                        ${{ v.saldo_pendiente|floatformat:2|intcomma }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td style="text-align: center" class="{% if v.valor_devolucion %}alert alert-danger{% endif %}">$ {{ v.valor_devolucion|floatformat:2 }}</td>
+                                                <td style="text-align: center">{{ v.cantidad_productos|floatformat:0 }}</td>
+                                                <td style="text-align: center">
+                                                    <span class="tl" title="{{ v.colaborador.nombre }}"> {{ v.colaborador.usuario }}</span>
+                                                </td>
+                                                <td style="text-align: center">
+                                                    {% if v.cancelada %}
+                                                        <label class="label label-success"> Cancelada</label>
+                                                    {% endif %}
+                                                    {% if not v.valida %}
+                                                        <label class="label label-important"> Anulada</label>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                                            <span class="smaller10">Acciones</span>
+                                                            <span class="caret"></span>
+                                                        </a>
+                                                        <ul class="dropdown-menu pull-right list-group">
+                                                            <li class="smaller10"><a class="detallefact" href='#' fid="{{ v.id }}" num_fact="{{ v.numero }}"> <i class='fa fa-list'></i> Detalles de la Venta</a></li>
+                                                            <li class="smaller10"><a class="imprimir" href='#' fid="{{ v.id }}"><i class='fa fa-print'></i> Imprimir la Factura</a></li>
+
+                                                            {% if v.valida and not v.tiene_pagos_asociados %}
+                                                                <li class="smaller10"><a href='/consultas?action=devolucion_venta&id={{ v.id }}' class="btn-form"> <i class='fa fa-backward'></i> Devoluci&oacute;n de Venta </a></li>
+                                                                <li class="smaller10"><a class="btn-form" href='/consultas?action=anular_factura&id={{ v.id }}' pid="{{ v.id }}"><i class='fa fa-minus'></i> Anular la Venta</a></li>
+                                                            {% endif %}
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="12">
+                                                    {% if searchv %}
+                                                        No se han encontrado ventas segun la busqueda ingresada
+                                                    {% else %}
+                                                        No existen ventas registradas en el sistema
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if paging.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if paging.primera_pagina %}
+                                                <li><a href="/consultas?action=consulta_ventas&page=1">1</a></li>
+                                                <li><a href="/consultas?action=consulta_ventas&page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in paging.paginas %}
+                                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/consultas?action=consulta_ventas&page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if paging.ultima_pagina %}
+                                                <li><a href="/consultas?action=consulta_ventas&page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/consultas?action=consulta_ventas&page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in paging.page_range %}
+                                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/consultas?action=consulta_ventas&{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block moreblock %}
+    <div class="modal fade static" id="detalle_factura" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Detalles de factura: <span id="num_factura"></span> </h3>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+{#                <a href="#" class='btn btn-warning' id='exportar_detalle' vid=""><i class="fa fa-file-excel-o"> Exportar</i></a>#}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

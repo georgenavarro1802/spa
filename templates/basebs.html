@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block pagetitle %}{{ title }}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de inventarios Spa Enliven">
+    <meta name="author" content="SPA Enliven">
+
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/bootstrap-modal.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/stylesbs.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/menu.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/estilos.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/listados.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/css.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/datepicker.css' %}" rel='stylesheet'/>
+    <link href="{% static 'css/jquery.flexbox.css' %}" type="text/css" rel="stylesheet" />
+    <link href="{% static 'css/smoke.css' %}" rel="stylesheet" type="text/css" media="screen" />
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet" />
+    <link href="{% static 'css/jquery.fancybox.css?v=2.1.4' %}" type="text/css" media="screen" rel="stylesheet"/>
+    <link href="{% static 'css/jquery.gridster.css' %}" type="text/css" media="screen" rel="stylesheet"/>
+    <link href="{% static 'css/select2.min.css' %}" rel="stylesheet" />
+
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-modal.js' %}"></script>
+    <script src="{% static 'js/bootstrap-modalmanager.js' %}"></script>
+    <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'js/bootstrap-timepicker.js' %}"></script>
+    <script src="{% static 'js/jquery.blockUI.js' %}"></script>
+    <script src="{% static 'js/jquery.maskedinput.min.js' %}"></script>
+    <script src='{% static 'js/jquery.floats.js' %}'></script>
+    <script src='{% static 'js/jquery.flexbox.min.js' %}'></script>
+    <script src="{% static 'js/big.min.js' %}"></script>
+    <script src="{% static 'js/smoke.min.js' %}"></script>
+    <script src="{% static 'js/jquery.fancybox.pack.js' %}"></script>
+    <script src="{% static 'js/highcharts/highcharts.js' %}"></script>
+    <script src="{% static 'js/highcharts/modules/exporting.js' %}"></script>
+    <script src="{% static 'js/jquery.gridster.js' %}"></script>
+    <script src="{% static 'js/jquery.mixitup.min.js' %}"></script>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+
+    <script src="{% static 'js/notificacionpanel.js' %}"></script>
+
+    <script>
+        $(function() {
+
+            $('.myselect2').select2();
+
+            $(".fancybox").fancybox();
+
+            $("*" ).focusin(function(){
+                $('.datepicker').css({"display": "none"});
+            });
+
+            showWaiting = function(titulo, mensaje, close) {
+                var panel = $("#waitpanel");
+                $("#waitpaneltitle").html(titulo);
+                $("#waitpanelbody").html(mensaje);
+                if (!close) {
+                    panel.modal({keyboard: false, backdrop: 'static'});
+                }
+                panel.modal("show");
+            };
+
+            hideWaiting = function() {
+                $("#waitpanel").modal("hide");
+            };
+
+            sinurlatrasbutton = function(){
+                if (location.pathname=='/'){
+                    $("#urlatrasbutton").remove();
+                }
+            };
+
+            deshabilitar = function(nombre) {
+                $(nombre).attr({"disabled": "disabled"});
+            };
+
+            habilitar = function(nombre) {
+                $(nombre).removeAttr("disabled").removeAttr("readonly");
+            };
+
+            numerico = function(elemento, min, max, decimales) {
+                var nvalor;
+                var valor = elemento.val();
+                if (valor==""){
+                    valor = parseFloat(min).toFixed(decimales);
+                    elemento.val(valor);
+                    return;
+                }
+                if (isNaN(valor)){
+                    nvalor = parseFloat(min).toFixed(decimales);
+                    elemento.val(nvalor);
+                    return;
+                }
+                if (valor < min) {
+                    nvalor = parseFloat(min).toFixed(decimales);
+                    elemento.val(nvalor);
+                    return;
+                }
+                if (max>0 && valor>max){
+                    nvalor = parseFloat(max).toFixed(decimales);
+                    elemento.val(nvalor);
+                    return;
+                }
+                nvalor = parseFloat(valor).toFixed(decimales);
+                elemento.val(nvalor);
+            };
+
+            // Funcion de redondeo que reemplaza a la funcion math.round() de javascript por fallos al redondear
+            redondeo = function(numero, presicion){
+                var multiplicador = Math.pow(10, presicion + 1);
+                var num_multi = Math.floor(numero * multiplicador);
+                var num_redondeado = (Math.round(num_multi/10)) * 10 / multiplicador;
+
+                if (num_redondeado == 0){
+                    return 0;
+                }else{
+                    if ( !isNaN(num_redondeado))
+                        return num_redondeado;
+                    else
+                        return 0;
+                }
+            };
+
+            // Función que redondea el valor que contiene una caja de texto inputs
+            redondear = function(obj){
+                var numero = $(obj).val();
+                var presicion = 2;
+                if (!isNaN(numero)){
+                    if (numero == 0)
+                        $(obj).val((0).toFixed(presicion));
+                    else
+                        $(obj).val(redondeo(numero, presicion).toFixed(2));
+                }
+            };
+
+            validacionesnumericas = function() {
+                $(".validarnumero").blur(function(){
+                    numerico($(this), 0, 0, 0);
+                });
+
+                $(".validarmoneda").blur(function(){
+                    numerico($(this), 0, 0, 2);
+                });
+            };
+
+            sinurlatrasbutton();
+
+            serverdate=new Date({{ currenttime.year }},{{ currenttime.month }}-1,{{ currenttime.day }}, {{ currenttime.hour }},{{ currenttime.minute }},{{ currenttime.second }},0);
+            clientdate=new Date();
+
+            showTime = function(){
+                var s;
+                var m;
+                var today=new Date();
+                var timediff = today - clientdate;
+                var renderdate = new Date(serverdate.getTime() + timediff);
+                var h=renderdate.getHours();
+                var mer = " AM";
+                if (h>12) {
+                    mer = " PM";
+                    h -= 12;
+                }
+                m=renderdate.getMinutes();
+                s=renderdate.getSeconds();
+                m=checkTime(m);
+                s=checkTime(s);
+                $("#clock").text(h+":"+m+mer);
+            };
+
+            checkTime = function(i){
+                if (i<10){
+                    i="0" + i;
+                }
+                return i;
+            };
+
+            setInterval(showTime,15000);
+
+            showTime();
+
+            $('.dropdown-toggle').dropdown();
+            $(".collapse").collapse();
+            $('.tips').tooltip({});
+
+            $("#id_email, #id_emailinst, #id_correoinstasoc, #id_correoinst").css({'text-transform': 'none'});
+
+            $("table tbody tr").hover(function(){
+                $(this).addClass("info");
+            }, function() {
+                $(this).removeClass("info");
+            });
+
+            bloqueointerface = function(){
+                $.blockUI({message: $('#throbber'), css: { 'left': '42%', 'width':'120px',  'padding': '15px',  '-webkit-border-radius': '10px', '-moz-border-radius': '10px', opacity: .9, color: '#000' }});
+            };
+
+            $(".btn-form").click(function(){
+                bloqueointerface();
+            });
+
+            if (typeof String.prototype.startsWith != 'function') {
+                String.prototype.startsWith = function (str){
+                    return this.indexOf(str) == 0;
+                };
+            }
+
+            if (typeof String.prototype.endsWith != 'function') {
+                String.prototype.endsWith = function (str){
+                    return this.slice(-str.length) == str;
+                };
+            }
+
+            {% if ret %}
+                var url = document.referrer.split('/')[3];
+                $('#urlatrasbutton').attr({'href':url});
+            {% endif %}
+
+            history.pushState(null, null, location.href);
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, location.href);
+            });
+
+            // Remove .current class from all tabs
+            $("#main-nav").children().children().removeClass('current');
+
+            $(".tl").tooltip({placement:"top"});
+            $(".tr").tooltip({placement:"right"});
+
+        });
+    </script>
+
+    {% block heading %}
+    {% endblock %}
+</head>
+
+<body data-spy="scroll" data-target=".subnav" data-offset="50" {% if not persona %}class='{% block contentextraclass %}{% endblock %}{% endif %}'>
+<div id="nav-header" class="navbar navbar-inverse">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <ul class='nav'>
+                <li>
+                    <a href="/"><img style="height: 25px" src='{% static '' %}images/menu-logo-v7.png'/>
+                        {#                        <span style="font-size: 17px; font-weight: bold; vertical-align: middle; font-family: 'Lucida Sans'"> {{ nombreinstitucion }}</span>#}
+                    </a>
+                </li>
+            </ul>
+            {% if not usuario.is_anonymous %}
+                <div id="header_buttons" class="pull-right">
+                    <ul class='nav'>
+                        <li><a href="#"><i class="fa fa-user "></i> {{ usuario.username }}</a></li>
+                        <li><a href="/pass"><i class="fa fa-lock "></i> Clave</a></li>
+                        {% if usuario.is_superuser %}
+                            <li><a href='/admin' target="_blank"><i class="fa fa-star"></i> Administraci&oacute;n</a></li>
+                        {% endif %}
+                        <li><a href="/logout"><i class="fa fa-sign-out "></i> Salir</a></li>
+                        {#                        <li class="divider-vertical"></li>#}
+                        <li><a href="javascript:;" style="font-size: 20px;" id="clock"></a></li>
+                    </ul>
+                </div>
+
+                {% if es_administrador or es_cajero %}
+                    <div class="span12">
+                        <ul id="main-nav">
+                            <li>
+                                <a id="pestana0" href="{% url 'index' %}" class="btn-form"> Inicio</a>
+                            </li>
+                            <li>
+                                <a id="pestana3" href="{% url 'caja' %}" class="btn-form"> Cajas</a>
+                            </li>
+                            <li>
+                                <a id="pestana2" href="{% url 'productos' %}" class="btn-form"> Productos</a>
+                            </li>
+                            <li>
+                                <a id="pestana13" href="{% url 'servicios' %}" class="btn-form"> Servicios</a>
+                            </li>
+                            <li>
+                                <a id="pestana14" href="{% url 'paquetes' %}" class="btn-form"> Paquetes</a>
+                            </li>
+                            <li>
+                                <a id="pestana7" href="{% url 'sesiones' %}" class="btn-form"> Sesiones</a>
+                            </li>
+                            <li>
+                                <a id="pestana4" href="{% url 'clientes' %}" class="btn-form"> Clientes</a>
+                            </li>
+                            <li>
+                                <a id="pestana5" href="{% url 'proveedores' %}" class="btn-form"> Proveedores</a>
+                            </li>
+                            <li>
+                                <a id="pestana1" href="{% url 'ventas' %}" class="btn-form"> Ventas</a>
+                            </li>
+                            <li>
+                                <a id="pestana6" href="{% url 'compras' %}" class="btn-form"> Compras</a>
+                            </li>
+                            <li>
+                                <a id="pestana8" href="{% url 'pagos' %}" class="btn-form"> Cobros</a>
+                            </li>
+                            <li>
+                                <a id="pestana9" href="{% url 'consultas' %}" class="btn-form"> Consultas</a>
+                            </li>
+                            <li>
+                                <a id="pestana10" href="{% url 'estadisticas' %}" class="btn-form"> Estad&iacute;sticas</a>
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="content">
+    <div class='container-fluid'>
+        {% block canvas %}
+        {% endblock %}
+    </div>
+</div>
+
+{% if not request.user.is_anonymous %}
+    <div id="nav-footer" class='navbar navbar-fixed-bottom'>
+        <div class='row-fluid'>
+            <div class="span12 smaller">
+                <div style="text-align: center">
+                    <div>{{ nombreinstitucion }} (c) 2017 | <a href="http://www.enlivenec.com/" target="_blank">www.enlivenec.com</a> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="modal fade static" id="waitpanel" style="display: none;">
+    <div class="modal-header">
+        <h4 id="waitpaneltitle"></h4>
+    </div>
+    <div class="modal-body">
+        <p id="waitpanelbody"></p>
+    </div>
+</div>
+
+<div id="throbber" style="display:none; margin: 0 auto; width: 130px; height: 130px; background-color: transparent">
+    <img src="{% static 'images/loading_2.gif' %}"/>
+</div>
+
+{% block moreblock %}
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,67 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+        <a href="/" class="btn btn-default btn-form" style="float: right"><i class="fa fa-arrow-left"></i> Atr&aacute;s</a>
+        <h4>Servicios Recibidos</h4>
+        <br/>
+        <table class='table table-bordered' cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th style="width: 100px; text-align: center">Fecha</th>
+                <th style="width: 150px">C&oacute;digo</th>
+                <th>Descripci&oacute;n</th>
+                <th style="width: 220px">Categor&iacute;a</th>
+                <th style="width: 80px; text-align: center">U.M.</th>
+                <th style="width: 80px; text-align: center">Precio</th>
+                <th style="width: 100px; text-align: center">Factura</th>
+                <th style="width: 200px; text-align: center">Colaborador</th>
+                <th style="width: 150px; text-align: center">Valoraci&oacute;n</th>
+                <th style="width: 60px; text-align: center">Recom.</th>
+                <th style="width: 100px; text-align: center"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for d in detalles_facturas %}
+                <tr>
+                    <td style="text-align: center">{{ d.factura.fecha|date:'d-m-Y' }}</td>
+                    <td>{{ d.servicio.codigo }}</td>
+                    <td>{{ d.servicio.descripcion }}</td>
+                    <td>{{ d.servicio.tiposervicio.nombre }}</td>
+                    <td style="text-align: center">{{ d.servicio.unidadmedida }}</td>
+                    <td style="text-align: right"> $
+                        {% if cliente.tipo == 1 %}
+                            {{ d.servicio.precio_cliente_normal|floatformat:2 }}
+                        {% elif cliente.tipo == 2 %}
+                            {{ d.servicio.precio_cliente_corporativo|floatformat:2 }}
+                        {% else %}
+                            {{ d.servicio.precio_cliente_vip|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center">{{ d.factura.numero }}</td>
+                    <td style="text-align: center">{{ d.factura.colaborador.nombre }}</td>
+                    <td style="text-align: center">{{ d.get_valoracion_servicio_display|default_if_none:"" }}</td>
+                    <td style="text-align: center">
+                        {% if d.recomendaciones_servicio %} <i class="fa fa-check tl" title="{{ d.recomendaciones_servicio }}"></i> {% endif %}
+                    </td>
+                    <td style="text-align: center">
+                        <a class="btn btn-mini btn-info btn-form tl" title="Valorar y Recomendar" href="/panelclientes?action=valorar_servicio&id={{ d.id }}"><i class="fa fa-asterisk fa-fw"></i> Evaluar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="10">NO TIENE SERVICIOS RECIBIDOS</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+

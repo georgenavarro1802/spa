@@ -1,0 +1,193 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            $("#search").click(function() {
+                var term = $("#searchfield").val().toUpperCase();
+                location.href = "/productos?s="+term;
+            });
+
+            $('#searchfield').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#search").trigger("click");
+                }
+            });
+
+            aplicar_filtros = function(){
+                bloqueointerface();
+                var cid = $("#categoriasel").val();
+                var tid = $("#tiposel").val();
+                location.href = '/productos?t='+cid+"&tipo="+tid;
+            };
+
+            $("#categoriasel").change(aplicar_filtros);
+            $("#tiposel").change(aplicar_filtros);
+
+            $(".favorito").click(function(){
+                var idprod = $(this).attr("pid");
+                bloqueointerface();
+                $.post("/productos", {'action':'favorito', 'idprod': idprod}, function(data){
+                    if (data.result=='ok'){
+                        $.unblockUI();
+                        location.reload();
+                    }
+                },"json");
+                return false;
+            });
+
+            //Activar pestana
+            $("#pestana2").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+        <div class="panel panel-turquesa">
+            <div class="panel-heading">
+                <div class="row-fluid">
+                    <div class='span6'>
+                        <input class='searchinput input-xlarge search-query' type='text' id='searchfield' value='{{ search }}'/>
+                        <a href="#" id='search' class='btn btn-success tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                        {% if search %}
+                            <a href="/productos" id='allresults' class='btn btn-info tr' title="Ver todos"><i class="fa fa-list"></i></a>
+                        {% endif %}
+                    </div>
+                    <div class="span6">
+                        <label for="categoriasel"></label>
+                        <select id='categoriasel' style="float: right; margin-left: 1em">
+                            <option value='0'>-----</option>
+                            {% for t in tipos_productos %}
+                                <option value="{{ t.id }}" {% ifequal categoriaid t.id %}selected="selected"{% endifequal %}>{{ t }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="tiposel"></label>
+                        <select id='tiposel' style="float: right;">
+                            <option value='0'>-----</option>
+                            <option value="1" {% ifequal tipoid 1 %}selected="selected"{% endifequal %}>PARA VENTA</option>
+                            <option value="2" {% ifequal tipoid 2 %}selected="selected"{% endifequal %}>PARA CONSUMO</option>
+                            <option value="3" {% ifequal tipoid 3 %}selected="selected"{% endifequal %}>RECIBO CONSIGNACION</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center"></th>
+                        <th style="width: 120px">C&oacute;digo</th>
+                        <th>Descripci&oacute;n</th>
+                        <th style="width: 220px">Categor&iacute;a</th>
+                        <th style="width: 60px; text-align: center">U.M.</th>
+                        <th style="width: 60px; text-align: center">Prec.Ref.</th>
+                        <th style="width: 60px; text-align: center">Prec.Norm.</th>
+                        <th style="width: 60px; text-align: center">Prec.Corp.</th>
+                        <th style="width: 60px; text-align: center">Prec.Vip</th>
+                        <th style="width: 40px; text-align: center">M&iacute;n.</th>
+                        <th style="width: 40px; text-align: center">IVA.?</th>
+                        <th style="width: 40px; text-align: center">FAV.?</th>
+                        <th style="width: 50px"></th>
+                        <th style="width: 80px"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in productos %}
+                        <tr>
+                            <td style="text-align: center">
+                                <label class="badge {% if p.tipo == 1 %}badge-success{% elif p.tipo == 2 %}badge-info{% else %}{% endif %} tl" title="{% if p.tipo == 2 %}Para consumo{% elif cliente.tipo == 3 %}Recibido consignaci&oacute;n{% else %}Para venta{% endif %}">
+                                    {{ p.get_tipo_display }}
+                                </label>
+                            </td>
+                            <td>{{ p.codigo }}</td>
+                            <td>{{ p.descripcion }}</td>
+                            <td>{{ p.tipoproducto.nombre }}</td>
+                            <td style="text-align: center">{{ p.unidadmedida }}</td>
+                            <td style="text-align: right">$ {{ p.precio|floatformat:2 }}</td>
+                            <td style="text-align: right">$ {{ p.precio_cliente_normal|floatformat:2 }}</td>
+                            <td style="text-align: right">$ {{ p.precio_cliente_corporativo|floatformat:2 }}</td>
+                            <td style="text-align: right">$ {{ p.precio_cliente_vip|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.minimo|floatformat:0 }}</td>
+                            <td style="text-align: center"> <a href="#"> {% if p.con_iva %} <i class="fa fa-check"></i> {% endif %} </a> </td>
+                            <td style="text-align: center"> <a href="#"> {% if p.favorito %} <i class="fa fa-check"></i> {% endif %} </a> </td>
+                            <td style="text-align: center">
+                                <a href='{% if p.foto %}{{ p.download_foto }}{% endif %}' class="{% if p.foto %}fancybox{% endif %}" rel="group">
+                                    <img src="{{ p.download_foto }}" width="20px" height="20px">
+                                </a>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                        <span class="smaller10">Acciones</span>
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu pull-right list-group">
+                                        <li class="smaller10"><a class="list-group-item btn-form" href="/productos?action=cargarfoto&id={{ p.id }}"><i class="fa fa-camera fa-fw"></i>&nbsp; Foto del producto</a> </li>
+                                        <li class="smaller10">
+                                            <a class="list-group-item favorito btn-form" pid="{{ p.id }}" href="#"><i class="fa fa-asterisk fa-fw"></i>&nbsp;
+                                                Establecer como <b>{% if p.favorito %}No{% endif %} Favorito</b>
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li class="smaller10"><a class="list-group-item btn-form" href="/productos?action=edit&id={{ p.id }}"><i class="fa fa-edit fa-fw"></i>&nbsp; Editar el producto</a> </li>
+                                        {% if not p.en_uso %}
+                                            <li class="smaller10"><a class="list-group-item btn-form" href="/productos?action=delete&id={{ p.id }}"><i class="fa fa-times fa-fw"></i>&nbsp; Eliminar el producto</a> </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="15">
+                                {% if categoriaid or tipoid or search %}
+                                    No se encontraron productos segun las b&uacute;squedas seleccionadas
+                                {% else %}
+                                    No existen productos registrados en la entidad
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <a href="/productos?action=add" class="btn btn-turquesa"><i class="fa fa-plus"></i> Adicionar </a>
+    </div>
+
+    <div class='row-fluid'>
+        {% if paging.num_pages > 20 %}
+            <div class='pagination'>
+                <ul>
+                    {% if paging.primera_pagina %}
+                        <li><a href="/productos?page=1">1</a></li>
+                        <li><a href="/productos?page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                    {% endif %}
+                    {% for pagenumber in paging.paginas %}
+                        <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/productos?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                    {% endfor %}
+                    {% if paging.ultima_pagina %}
+                        <li><a href="/productos?page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                        <li><a href="/productos?page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% else %}
+            <div class='pagination'>
+                <ul>
+                    {% for pagenumber in paging.page_range %}
+                        <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/productos?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+

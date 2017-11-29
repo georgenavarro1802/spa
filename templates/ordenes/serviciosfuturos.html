@@ -1,0 +1,53 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    Servicios Futuros - Cliente {{ orden.cliente }}
+                </div>
+                <div class="panel-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 170px">Fecha</th>
+                                <th style="width: 230px">C&oacute;digo</th>
+                                <th>Descripci&oacute;n</th>
+                                <th style="width: 100px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for sf in servicios_futuros %}
+                            <tr>
+                                <td>{{ sf.fecha|date:'d-m-Y' }}</td>
+                                <td>{{ sf.servicio.codigo }}</td>
+                                <td>{{ sf.servicio.descripcion }}</td>
+                                <td style="text-align: center">
+                                    <a href="/ordenes?action=delete_serviciofuturo&id={{ sf.id }}" class="btn btn-danger btn-small btn-form"><i class="fa fa-times tl" title="Eliminar"></i> </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5"><i>No existen servicios futuros para el cliente</i></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <a href="/ordenes?action=add_serviciofuturo&id={{ orden.id }}" class='btn btn-turquesa btn-form'><i class="fa fa-plus"></i> Adicionar</a>
+                <a href="/ordenes" class='btn btn-default btn-form'><i class="fa fa-arrow-left"></i> Atr&aacute;s</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

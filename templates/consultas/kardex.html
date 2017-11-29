@@ -1,0 +1,104 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block atras %}/adm_inventarios{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span10'>
+            <h4>{{ title }}: {{ producto.nombre_corto }}</h4>
+        </div>
+        <div class="span2 atright">
+            <a href="/consultas?action=consulta_inventarios" class="btn btn-default btn-form"><i class="fa fa-arrow-left"></i> Atr&aacute;s</a>
+        </div>
+    </div>
+    <br/>
+    <div class="row-fluid">
+        <div class='span12'>
+            <table class='table table-bordered table-striped' cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th style='width: 40px; text-align: center'>No.</th>
+                    <th style="width: 100px ; text-align: center">Fecha</th>
+                    <th style="width: 120px; text-align: center">Tipo<br/>Movimiento</th>
+                    <th>Detalles del movimiento</th>
+                    <th style="width: 80px; text-align: center">Cantidad</th>
+                    <th style="width: 80px; text-align: center">Costo</th>
+                    <th style="width: 80px; text-align: center">Valor</th>
+                    <th style="width: 80px; text-align: center">Cantidad<br/>Anterior</th>
+                    <th style="width: 80px; text-align: center">Cantidad<br/>Actual</th>
+                    <th style="width: 80px; text-align: center">Valor<br/>Anterior</th>
+                    <th style="width: 80px; text-align: center">Valor<br/>Actual</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for inv in movimientos %}
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle">{{ forloop.counter }}</td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.fecha|date:'d-m-Y'  }}</td>
+                        <td style="text-align: center; vertical-align: middle">
+                            {% if inv.tipomovimiento == 1 %}
+                                <label class="badge badge-success">ENTRADA</label>
+                            {% else %}
+                                <label class="badge badge-info">SALIDA</label>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <table class="table table-condensed">
+                                {% if inv.es_compra %}
+                                    <tr>
+                                        {% if inv.dcompra %}
+                                            <td style="width: 200px">
+                                                {{ inv.dcompra.compra.tipodocumento.nombre }}: {{ inv.dcompra.compra.numerodocumento }}
+                                            </td>
+                                            <td colspan="2">Prov: {{ inv.dcompra.compra.proveedor }}{% if inv.dcompra.compra.descripcion %}, Desc: {{ inv.dcompra.compra.descripcion }}{% endif %} </td>
+                                        {% else %}
+                                            <td>Devoluci&oacute;n de venta #: {{ inv.ddevventa.detalleventa.repr_id }} (Fact: {{ inv.ddevventa.venta.repr_id }})</td>
+                                        {% endif %}
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        {% if inv.dventa %}
+                                            <td style="width: 200px">Doc: {{ inv.dventa.factura.numero }}</td>
+                                            <td>Cajero: {{ inv.dventa.factura.cajero.nombre }} {% if inv.dventa.factura.colaborador %}, Colab: {{ inv.dventa.factura.colaborador.nombre }}{% endif %}</td>
+                                        {% else %}
+                                            <td>Devoluci&oacute;n de compra #: {{ inv.ddevcompra.detallecompra.repr_id }} (Fact: {{ inv.ddevcompra.compra.repr_id }})</td>
+                                        {% endif %}
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </td>
+                        <td style="text-align: center; vertical-align: middle">
+                            {% if inv.es_compra %}
+                                {{ inv.cantidad|floatformat:2|intcomma }}
+                            {% else %}
+                                ({{inv.cantidad|floatformat:2|intcomma}})
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.inventario.costo|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.valor|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.saldoinicialcantidad|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.saldofinalcantidad|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.saldoinicialvalor|floatformat:2|intcomma }}</td>
+                        <td style="text-align: center; vertical-align: middle">{{ inv.saldofinalvalor|floatformat:2|intcomma }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">
+                            NO EXISTEN MOVIMIENTOS DE ESTE PRODUCTO EN EL SISTEMA
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

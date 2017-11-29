@@ -1,0 +1,16 @@
+{% extends "ajaxdeletebs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            //Activar pestana
+            $("#pestana2").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/productos?action=precios&id={{ producto.id }}{% endblock %}
+{% block formdestination %}/productos?action=precios&id={{ producto.id }}{% endblock %}
+{% block formaction %}/productos?action=precios&id={{ producto.id }}{% endblock %}
+{% block formactionvalue %}deleteprecio{% endblock %}
+{% block formobjectid %}{{ producto.id }}{% endblock %}
+{% block formobjectname %}el rango de precios: <b>{{ precio }}</b>{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_paquete, #id_cliente, #id_fecha, #id_observaciones").addClass("validate[required]");
+
+            $("#id_fecha, #id_proxima_cita").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+        });
+
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }} {{ cliente }}{% endblock %}
+{% block formaction %}/panelcolaborador{% endblock %}
+{% block formdestination %}/panelcolaborador?action=missesiones{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='editsesion'/>
+    <input type='hidden' name='id' value='{{ sesion.id }}'/>
+{% endblock %}
+{% block formback %}/panelcolaborador?action=missesiones{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

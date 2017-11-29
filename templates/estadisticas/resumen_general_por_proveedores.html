@@ -1,0 +1,93 @@
+<script>
+    $(function () {
+
+        // Build the chart
+        $('#contenido1').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: ''
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        },
+                        connectorColor: 'silver'
+                    }
+                }
+            },
+            series: [{
+                name: 'Ganancias',
+                data: [
+                    {% for v in valores_tabla %}
+                        {% if v.5 > 0 %}
+                            { name: '{{ v.0 }}', y: {{ v.5|floatformat:2 }} }
+                            {% if not forloop.last %},{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+
+    });
+</script>
+
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title1 }}</div>
+    <div class="panel-body">
+        <div id="contenido1" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title2 }}</div>
+    <div class="panel-body">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Proveedor</th>
+                <th style="width: 100px; text-align: center">COSTO</th>
+                <th style="width: 100px; text-align: center">Comisi&oacute;n (5%)</th>
+                <th style="width: 100px; text-align: center">Retenci&oacute;n</th>
+                <th style="width: 100px; text-align: center">Venta</th>
+                <th style="width: 100px; text-align: center">Ganancia</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for v in valores_tabla %}
+                <tr>
+                    <td>{{ v.0 }}</td>
+                    <td style="text-align: right">$ {{ v.1|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.2|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.3|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.4|floatformat:2 }}</td>
+                    <td style="text-align: right" class="{% if v.5 < 0 %}alert alert-danger{% endif %}">$ {{ v.5|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr style="font-weight: bold">
+                <td class="larger"><b>Totales</b></td>
+                <td class="larger" style="text-align: right">$ {{ valor_total_cif_compras|floatformat:2 }}</td>
+                <td class="larger" style="text-align: right">$ {{ valor_total_productos_comision_ventas|floatformat:2 }}</td>
+                <td class="larger" style="text-align: right">$ {{ valor_total_productos_pagos_retencion|floatformat:2 }}</td>
+                <td class="larger" style="text-align: right">$ {{ valor_total_productos_ventas|floatformat:2 }}</td>
+                <td class="larger" style="text-align: right">$ {{ ganancia_total|floatformat:2 }}</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

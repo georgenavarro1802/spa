@@ -1,0 +1,13 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_video").addClass("validate[required]");
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }} {{ cliente }}{% endblock %}
+{% block formaction %}/subir_video{% endblock %}
+{% block formdestination %}/{% endblock %}
+{% block formback %}/{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

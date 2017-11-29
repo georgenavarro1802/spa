@@ -1,0 +1,25 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+
+            $("#id_motivo").addClass("validate[required]");
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+
+        });
+    </script>
+
+{% endblock %}
+{% block titulo_centrado %} {{ title }} {% endblock %}
+{% block subtitulo %} Factura: {{ factura.numero }} <br/> Cliente: {{ factura.cliente.nombre }} <br/> Valor: ${{ factura.total|floatformat:2 }}{% endblock %}
+{% block formaction %}/consultas{% endblock %}
+{% block formdestination %}/consultas?tab=1{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='anular_factura'/>
+    <input type='hidden' name='id' value='{{ factura.id }}'/>
+
+{% endblock %}
+{% block formback %}/consultas?tab=1{% endblock %}
+{% block buttonname %}Anular{% endblock %}

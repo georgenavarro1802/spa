@@ -1,0 +1,144 @@
+<script>
+
+    $(function() {
+
+        /////////////////////////// FUNCION PRINCIPAL /////////////////////////
+
+        $(".iconprod").click(function(){
+            var idprod = $(this).attr("idprod");
+            var codprod = $(this).attr("codprod");
+            var tipoprod = $(this).attr("tipo");
+            var categoriaprod = $(this).attr("categoria");
+            var nombreprod = $(this).attr("nombreprod");
+            var invprod = parseFloat($(this).attr("invprod"));
+            var pvpprod = parseFloat($(this).attr("pvpprod"));
+            var fotoprod = $(this).attr("fotoprod");
+            var aliasprod = $(this).attr("aliasprod");
+            var flat = false;
+            var item = {};
+            var subtotal = 0;
+            if (items.productos.length > 0){
+                for (var i in items.productos) {
+                    var itemp = items.productos[i];
+
+                    if (codprod == itemp.codproducto){
+                        if (itemp.cantidad + 1 > itemp.invproducto && tipoprod == "PRODUCTO"){
+                            notificarAlerta('Alerta', 'Ha sobrepasado la cantidad disponible en inventario', 'Cerrar', cerrarNotificacionPanel);
+                            flat = true;
+                            break;
+                        }
+                        itemp.cantidad += 1;
+                        itemp.subtotal = Math.round((itemp.cantidad * itemp.pvpproducto)*100)/100;
+                        itemp.neto = Math.round((itemp.cantidad * itemp.pvpproducto)*100)/100;
+                        flat = true;
+                    }
+                }
+            }
+            if (!flat){
+                item.codproducto = codprod;
+                item.nombreproducto = nombreprod;
+                item.tipoproducto = tipoprod;
+                item.categoriaproducto = categoriaprod;
+                item.aliasproducto = aliasprod;
+
+                item.cantidad = 1;
+                item.pvpproducto = pvpprod;
+                item.invproducto = invprod;
+
+                item.subtotal = Math.round((item.cantidad * item.pvpproducto)*100)/100;
+                item.neto = item.subtotal;
+{#                item.porcientodescuento = 0;#}
+{#                item.valordescuento = 0;#}
+
+                items.productos.push(item);
+
+                $("#confirmar").show();
+                $("#cancelar").hide();
+                $("#importar").hide();
+            }
+
+            updateItems();
+            return false;
+        });
+
+        $(".tl").tooltip({placement:"top"});
+
+    });
+
+</script>
+
+{% if productos %}
+    {% for inv in productos %}
+        <div class='iconprod' id='icon{{ inv.producto.codigo }}' tipo="PRODUCTO" categoria="{{ inv.producto.tipoproducto.nombre }}" categoriaid="{{ inv.producto.tipoproducto.id }}" idprod='{{ inv.producto.id }}' codprod="{{ inv.producto.codigo }}" nombreprod="{{ inv.producto.nombre_corto }}" invprod="{{ inv.cantidad|floatformat:0 }}" pvpprod="{% if tipocliente == 1 %}{{ inv.producto.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ inv.producto.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ inv.producto.precio_cliente_vip|floatformat:2 }}{% endif %}" fotoprod="{{ inv.producto.download_foto }}" aliasprod="{{ inv.producto.alias }}">
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    {{ inv.producto.codigo }}
+                    <span style="float: right"> $ {% if tipocliente == 1 %}{{ inv.producto.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ inv.producto.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ inv.producto.precio_cliente_vip|floatformat:2 }}{% endif %}</span>
+                </div>
+                <div class="panel-body" style="height: 50px; cursor: pointer">
+                    {% if inv.producto.alias %}
+                        {{ inv.producto.alias }}
+                    {% else %}
+                        {{ inv.producto.descripcion|slice:":20" }}...
+                    {% endif %}
+                    <br/>
+                    <span style="float: right">
+                        <label class="badge {% if inv.cantidad < inv.producto.minimo %}badge-important{% else %}badge-success{% endif %}"> {{ inv.cantidad|floatformat:0 }}</label>
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    {% if tipoprod %}
+        <div class="alert alert-danger">
+            <h5><i class="fa fa-info-circle"></i> No existen <strong>productos</strong> con existencias en la categor&iacute;a: {% if favoritos %}FAVORITOS{% endif %}{% if tipoprod %}{{ tipoprod.nombre }}{% endif %}</h5>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% if servicios %}
+    {% for servicio in servicios %}
+        <div class='iconprod' id='icon{{ servicio.codigo }}' tipo="SERVICIO" categoria="{{ servicio.tiposervicio.nombre }}" categoriaid="{{ servicio.tiposervicio.id }}" idprod='{{ servicio.id }}' codprod="{{ servicio.codigo }}" nombreprod="{{ servicio.nombre_corto }}" invprod="1" pvpprod="{% if tipocliente == 1 %}{{ servicio.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ servicio.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ servicio.precio_cliente_vip|floatformat:2 }}{% endif %}" aliasprod="{{ servicio.alias }}">
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    {{ servicio.codigo }}
+                    <span style="float: right"> $ {% if tipocliente == 1 %}{{ servicio.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ servicio.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ servicio.precio_cliente_vip|floatformat:2 }}{% endif %}</span>
+                </div>
+                <div class="panel-body" style="height: 50px; cursor: pointer">
+                    {{ servicio.alias }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    {% if tiposerv %}
+        <div class="alert alert-danger">
+            <h5><i class="fa fa-info-circle"></i> No existen <strong>servicios</strong> en la categor&iacute;a: {% if tiposerv %}{{ tiposerv.nombre }}{% endif %}</h5>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% if paquetes %}
+    {% for paquete in paquetes %}
+        <div class='iconprod' id='icon{{ paquete.codigo }}' tipo="PAQUETE" categoria="" categoriaid="" idprod='{{ paquete.id }}' codprod="{{ paquete.codigo }}" nombreprod="{{ paquete.nombre_corto }}" invprod="1" pvpprod="{% if tipocliente == 1 %}{{ paquete.valor_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ paquete.valor_cliente_corporativo|floatformat:2 }}{% else %}{{ paquete.valor_cliente_vip|floatformat:2 }}{% endif %}" aliasprod="{{ paquete.alias }}">
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    {{ paquete.codigo }}
+                    <span style="float: right"> $ {% if tipocliente == 1 %}{{ paquete.valor_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ paquete.valor_cliente_corporativo|floatformat:2 }}{% else %}{{ paquete.valor_cliente_vip|floatformat:2 }}{% endif %}</span>
+                </div>
+                <div class="panel-body" style="height: 50px; cursor: pointer">
+                    {{ paquete.alias }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    {% if tipopaquete %}
+        <div class="alert alert-danger">
+            <h5><i class="fa fa-info-circle"></i> No existen <strong>paquetes</strong> en el sistema</h5>
+        </div>
+    {% endif %}
+{% endif %}
+
+

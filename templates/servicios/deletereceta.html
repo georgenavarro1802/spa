@@ -1,0 +1,16 @@
+{% extends "ajaxdeletebs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            //Activar pestana
+            $("#pestana13").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/servicios?action=receta&id={{ receta.servicio.id }}{% endblock %}
+{% block formdestination %}/servicios?action=receta&id={{ receta.servicio.id }}{% endblock %}
+{% block formaction %}/servicios{% endblock %}
+{% block formactionvalue %}deletereceta{% endblock %}
+{% block formobjectid %}{{ receta.id }}{% endblock %}
+{% block formobjectname %}el producto <b>{{ receta.producto.codigo }}</b> de la receta{% endblock %}

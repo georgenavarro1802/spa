@@ -1,0 +1,16 @@
+{% extends "ajaxdeletebs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            //Activar pestana
+            $("#pestana2").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/productos{% endblock %}
+{% block formdestination %}/productos{% endblock %}
+{% block formaction %}/productos{% endblock %}
+{% block formactionvalue %}delete{% endblock %}
+{% block formobjectid %}{{ producto.id }}{% endblock %}
+{% block formobjectname %}el producto: <b>{{ producto }}</b>{% endblock %}

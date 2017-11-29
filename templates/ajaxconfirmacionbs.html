@@ -1,0 +1,67 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script type="text/javascript">
+        $(function() {
+            {% block javascript %}
+            {% endblock %}
+
+            envioformulario = function(){
+                $('.datepicker').css({"display": "none"});
+                bloqueointerface();
+                var formdata = new FormData($("#formulario")[0]);
+                $.ajax({
+                    type: "POST",
+                    url: "{% block formaction %}/{% endblock %}",
+                    data: formdata,
+                    success: function(data) {
+                        if (data.result == 'ok') {
+                            location.href = "{% block formdestination %}/{% endblock %}";
+                        } else {
+                            $.unblockUI();
+                            smoke.alert(data.mensaje);
+                        }
+                    },
+                    error: function() {
+                        $.unblockUI();
+                        smoke.alert("Error al enviar los datos.");
+                    },
+                    dataType: "json",
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                });
+            };
+
+            $("#formbutton").click(function(){
+                envioformulario();
+            });
+        });
+    </script>
+{% endblock %}
+{% block atras %}/{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class="span12">
+            <div class="{% block formwidth %}form-m{% endblock %}">
+                <div class='row-fluid'>
+                    <div class="well" style="margin-bottom: 3px;padding: 10px;">
+                        <h4>{% block titulo %}{% endblock %}</h4>
+                    </div>
+                </div>
+                <form id="formulario" class='well'>
+                    {% block mensaje %}{% endblock %}<b>{% block formobjectrepr %}{% endblock %}</b>
+                    {% block formextra %}
+                        <input type="hidden" name="id" value="{% block formobjectid %}{% endblock %}">
+                        <input type="hidden" name="action" value="{% block formactionvalue %}{% endblock %}">
+                    {% endblock %}
+                    {% block fieldsextra %}
+                    {% endblock %}
+                    <p style="text-align: right; margin-top: 20px">
+                        <a id="formbutton" class='btn btn-danger btn-form'><i class="fa fa-check"></i> {% block botonlabel %}Si{% endblock %}</a>
+                        <a href="{% block formback %}#{% endblock %}" class="btn btn-info"><i class="fa fa-times"></i> No</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

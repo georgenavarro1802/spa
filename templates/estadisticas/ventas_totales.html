@@ -1,0 +1,114 @@
+<script>
+    $(function () {
+
+        $('#contenido1').highcharts({
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: [{% for v in valores_tabla %}'{{ v.0 }}'{% if not forloop.last %},{% endif %}{% endfor %}]
+            },
+            yAxis: {
+                title: {
+                    text: 'Valores'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [{
+                name: 'Enliven',
+                data: {{ valores_totales }}
+            }]
+        });
+
+        $('#contenido2').highcharts({
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: [{% for v in valores_tabla %}'{{ v.0 }}'{% if not forloop.last %},{% endif %}{% endfor %}]
+            },
+            yAxis: {
+                title: {
+                    text: 'Facturas'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [{
+                name: 'Enliven',
+                data: {{ cantidad_facturas }}
+            }]
+        });
+
+    });
+</script>
+
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title1 }}</div>
+    <div class="panel-body">
+        <div id="contenido1" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title2 }}</div>
+    <div class="panel-body">
+        <div id="contenido2" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title3 }}</div>
+    <div class="panel-body">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Mes</th>
+                <th style="width: 100px; text-align: center">Facturas</th>
+                <th style="width: 150px; text-align: center">SubTotal</th>
+                <th style="width: 150px; text-align: center">Iva</th>
+                <th style="width: 150px; text-align: center">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for v in valores_tabla %}
+                <tr>
+                    <td>{{ v.0 }}</td>
+                    <td style="text-align: center">{{ v.1|floatformat:0 }}</td>
+                    <td style="text-align: right">$ {{ v.2|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.3|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ v.4|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr style="font-weight: bold">
+                <td class="larger"><b>Totales</b></td>
+                <td class="larger" style="text-align: center">{{ cantidad_facturas_fechas|floatformat:0 }}</td>
+                <td class="larger" style="text-align: right">$ {{ valores_ventas_subtotal_fechas|floatformat:2 }}</td>
+                <td class="larger" style="text-align: right">$ {{ valores_ventas_iva_fechas|floatformat:2 }}</td>
+                <td class="larger" style="text-align: right">$ {{ valores_ventas_total_fechas|floatformat:2 }}</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

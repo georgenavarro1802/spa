@@ -1,0 +1,234 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% load sga_extras %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            // Busqueda en Inventarios
+            $("#searchi").click(function() {
+                location.href = "/consultas?action=consulta_inventarios&si="+$("#searchfieldi").val().toUpperCase();
+            });
+            $('#searchfieldi').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchi").trigger("click");
+                }
+            });
+
+            ejecutar_filtros = function(){
+                var categoriaid = $("#inventariocategoria").val();
+                var orden = $("#inventarioorden").val();
+                bloqueointerface();
+                location.href = '/consultas?action=consulta_inventarios&cid='+categoriaid+'&oid='+orden;
+            };
+
+            $("#inventariocategoria").change(function () {
+                ejecutar_filtros();
+            });
+
+            $("#inventarioorden").change(function () {
+                ejecutar_filtros();
+            });
+
+            $("#filtrofechas").click(function(){
+                var inicio = $("#inicio").val();
+                var fin = $("#fin").val();
+                if (inicio && fin){
+                    bloqueointerface();
+                    location.href = '/consultas?action=consulta_inventarios&inicio='+inicio+'&fin='+fin;
+                }
+            });
+
+            $("#imprimir_inventario").click(function(){
+                var cid = $("#inventariocategoria").val();
+                location.href = '/consultas?action=imprimir_inventario&cid='+cid;
+            });
+
+            $("#inicio, #fin").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+            $("#exportar_resumen").click(function(){
+                var categoriaid = $("#inventariocategoria").val();
+                var orden = $("#inventarioorden").val();
+                var term = $("#searchfieldi").val().toUpperCase();
+                var inicio = "";
+                var fin = "";
+                if ($("#inicio").val()){
+                    inicio = $("#inicio").val();
+                }
+                if ($("#fin").val()){
+                    fin = $("#fin").val();
+                }
+                location.href = '/consultas?action=exportar_resumen_inventarios&si='+term+'&cid='+categoriaid+'&oid='+orden+'&inicio='+inicio+'&fin='+fin;
+            });
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div>
+                <ul class="nav nav-tabs">
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ventas" class="btn-form"><h3>Ventas</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_compras" class="btn-form"><h3>Compras</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_pagos" class="btn-form"><h3>Cobros</h3></a></li>
+                    <li style="margin-right: 5px" class="active"><a href="/consultas?action=consulta_inventarios" class="btn-form"><h3>Inventarios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cajeros" class="btn-form"><h3>Cajeros</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_colaboradores" class="btn-form"><h3>Colaboradores</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cif" class="btn-form"><h3>Historial Costos</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_precios" class="btn-form"><h3>Historial Precios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ordenes_servicio" class="btn-form"><h3>Ordenes Servicio</h3></a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class='row-fluid'>
+                            <div class="panel panel-turquesa">
+                                <div class="panel-heading">
+                                    <div class="row-fluid">
+                                        <div style="float: left;">
+                                            <select id="inventariocategoria" class="input-large" style="height: 30px; margin-top: 5px">
+                                                <option value="0">-----</option>
+                                                {% for t in tipos_producto %}
+                                                    <option value="{{ t.id }}" {% if t.id == categoria.id %}selected="selected"{% endif %}>{{ t }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {#                                            <a href="#" class='btn btn-success tl' title="Imprimir" id="imprimir_inventario"><i class="fa fa-print"></i></a>#}
+                                        </div>
+                                        <div style="float: left; margin-left: 15px">
+                                            <select id="inventarioorden" class="input-large" style="height: 30px; margin-top: 5px">
+                                                <option value="0">-----</option>
+                                                <option value="1" {% ifequal ordenid 1 %}selected{% endifequal %}>Ordenar de menor a mayor</option>
+                                                <option value="2" {% ifequal ordenid 2 %}selected{% endifequal %}>Ordenar de mayor a menor</option>
+                                            </select>
+                                        </div>
+                                        <div style="float: right; margin-left: 15px">
+                                            <input id='inicio' class="selectorfecha" style="height: 20px; margin-top: 5px" value="{{ inicio|date:'d-m-Y' }}"/>
+                                            <input id='fin' class="selectorfecha" style="height: 20px; margin-top: 5px" value="{{ fin|date:'d-m-Y' }}"/>
+                                            <a href="#" id='filtrofechas' class='btn btn-success btn-form tl' title="Filtrar rango"><i class="fa fa-search"></i></a>
+                                            {% if inventarios %}
+{#                                                <a href="#" id='exportar_resumen' class='btn btn-warning'><i class="fa fa-file-excel-o"> Exportar</i></a>#}
+                                            {% endif %}
+                                        </div>
+                                        <div class="atright">
+                                            <input class='searchinput input-large search-query' style="height: 30px; margin-top: 5px; text-transform: uppercase" type='text' id='searchfieldi' value='{{ searchi }}'/>
+                                            <a href="#" id='searchi' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                            {% if searchi %}
+                                                <a href="/consultas?action=consulta_inventarios" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 40px"></th>
+                                            <th style="width: 80px">C&oacute;digo</th>
+                                            <th style="width: 80px">Cod.Barra</th>
+                                            <th>Descripci&oacute;n</th>
+                                            <th style="width: 200px">Categor&iacute;a</th>
+                                            <th style="width: 100px">Tipo</th>
+                                            <th style="width: 40px; text-align: center">UM</th>
+                                            <th style="width: 60px; text-align: center">M&iacute;n.</th>
+                                            <th style="width: 70px; text-align: center">Disponible</th>
+                                            {% if inicio and fin %}
+                                                <th style="width: 70px; text-align: center">Cant.Vendida</th>
+                                                <th style="width: 70px; text-align: center">Sug.Import.</th>
+                                            {% endif %}
+                                            <th style="width: 70px; text-align: center">Costo</th>
+                                            <th style="width: 80px; text-align: center">Valor</th>
+                                            <th style="width: 30px; text-align: center"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for inv in inventarios %}
+                                            <tr {% if not inv.cantidad %}class="alert alert-danger"{% endif %}>
+                                                <td style="text-align: center">
+                                                    <a href='{% if inv.producto.foto %}{{ inv.producto.download_foto }}{% endif %}' class="{% if inv.producto.foto %}fancybox{% endif %}" rel="group">
+                                                        <img src="{{ inv.producto.download_foto }}" width="20px" height="20px">
+                                                    </a>
+                                                </td>
+                                                <td>{{ inv.producto.codigo }}</td>
+                                                <td>{{ inv.producto.codigobarra|default_if_none:"" }}</td>
+                                                <td>{{ inv.producto.descripcion }}</td>
+                                                <td>{{ inv.producto.tipoproducto.nombre }}</td>
+                                                <td>{{ inv.producto.tipo_nombre }}</td>
+                                                <td style="text-align: center">{{ inv.producto.unidadmedida }}</td>
+                                                <td style="text-align: center">{{ inv.producto.minimo|floatformat:2 }}</td>
+                                                <td style="text-align: center">
+                                                    {{ inv.cantidad|floatformat:2 }}
+                                                    {% if inv.esta_bajo_minimo and inv.cantidad %}
+                                                        <span class="tl" title="Inventario bajo m&iacute;nimo"><img src="/static/images/alerta_inventario.gif" width="20" height="18" style="vertical-align: bottom"></span>
+                                                    {% endif %}
+                                                </td>
+                                                {% if inicio and fin %}
+                                                    {% with cantvendida=inv|args:inicio|args:fin|call:"cantidad_vendida_fechas" %}
+                                                        <td style="text-align: center">{{ cantvendida|floatformat:2 }}</td>
+                                                        {% with sugerencia=cantvendida|resta:inv.cantidad  %}
+                                                            <td style="text-align: center">
+                                                                {% if sugerencia %}{{ sugerencia|floatformat:2 }}{% endif %}
+                                                            </td>
+                                                        {% endwith %}
+                                                    {% endwith %}
+                                                {% endif %}
+                                                <td style="text-align: center">$ {{ inv.costo|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">$ {{ inv.valor|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">
+                                                    <a href="/consultas?action=kardex_inventario&id={{ inv.producto.id }}" class="btn btn-mini btn-info tl btn-form" title="Kardex"><i class="fa fa-list"></i> </a>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="14">
+                                                    {% if searchp %}
+                                                        No se han encontrado inventarios segun la busqueda ingresada
+                                                    {% else %}
+                                                        No existen inventarios registrados en el sistema
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class='row-fluid'>
+                                {% if paging.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if paging.primera_pagina %}
+                                                <li><a href="/consultas?action=consulta_inventarios&page=1">1</a></li>
+                                                <li><a href="/consultas?action=consulta_inventarios&page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in paging.paginas %}
+                                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/consultas?action=consulta_inventarios&page={{ pagenumber }}{% if categoriaid %}&cid={{ categoriaid }}{% endif %}{% if ordenid %}&oid={{ ordenid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if paging.ultima_pagina %}
+                                                <li><a href="/consultas?action=consulta_inventarios&page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/consultas?action=consulta_inventarios&page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in paging.page_range %}
+                                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/consultas?action=consulta_inventarios&{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if categoriaid %}&cid={{ categoriaid }}{% endif %}{% if ordenid %}&oid={{ ordenid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

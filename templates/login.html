@@ -1,0 +1,43 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <link href="/static/css/landing-page.css" rel='stylesheet'/>
+{% endblock %}
+{% block contentextraclass %}bg{{ background }}{% endblock %}
+{% block pagetitle %}Inicio de Sesi&oacute;n{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+        <div class="span8"></div>
+        <div class='span4'>
+            <div class="intro-message">
+                <h1>ENLIVEN</h1>
+                <ul class="list-inline intro-social-buttons" style="margin-left: 0">
+                    <li>
+                        <a href="#" class="btn btn-turquesa"><i class="fa fa-twitter fa-fw"></i> <span class="network-name">Twitter</span></a>
+                        <a href="#" style="margin-left: 20px" class="btn btn-turquesa"><i class="fa fa-facebook fa-fw"></i> <span class="network-name">Facebook</span></a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Form para los usuarios del Centro -->
+            <form class="well form-xs" action='/login' method="POST">
+                {% if error %}
+                    <div class="alert alert-error">
+                        {% ifequal error "1" %}
+                            Credenciales incorrectas!
+                        {% endifequal %}
+                        {% ifequal error "3" %}
+                            Usuario est&aacute; Inactivo, contacte al Administrador
+                        {% endifequal %}
+                    </div>
+                {% endif %}
+                <input type="hidden" name='ret' value='{{ return_url }}'/>
+                <label class="larger"><b>Usuario</b></label>
+                <input type='text' name='user' style="text-transform: none; height: 30px" class='search-input input-block-level'/>
+                <label class="larger"><b>Clave</b></label>
+                <input type='password' name='pass' style="text-transform: none; height: 30px" class="search-input input-block-level"/>
+                <button type='submit' name='boton' class="btn btn-turquesa">
+                    <i class="fa fa-sign-in icon-white"></i><span style="vertical-align: middle"> Entrar</span>
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

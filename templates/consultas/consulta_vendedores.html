@@ -1,0 +1,79 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div>
+                <ul class="nav nav-tabs">
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ventas" class="btn-form"><h3>Ventas</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_compras" class="btn-form"><h3>Compras</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_pagos" class="btn-form"><h3>Cobros</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_inventarios" class="btn-form"><h3>Inventarios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cajeros" class="btn-form"><h3>Cajeros</h3></a></li>
+                    <li style="margin-right: 5px" class="active"><a href="/consultas?action=consulta_colaboradores" class="btn-form"><h3>Colaboradores</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cif" class="btn-form"><h3>Historial Costos</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_precios" class="btn-form"><h3>Historial Precios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ordenes_servicio" class="btn-form"><h3>Ordenes Servicio</h3></a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class='row-fluid'>
+                            <div class="panel panel-turquesa">
+                                <div class="panel-heading">
+                                    Resumen general de Ventas y Cobros por vendedores
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 150px">Usuario</th>
+                                            <th>Nombre</th>
+                                            <th style="width: 100px; text-align: center">Facturado</th>
+                                            <th style="width: 100px; text-align: center">Cobrado</th>
+                                            <th style="width: 100px; text-align: center">Pendiente</th>
+                                            <th style="width: 100px; text-align: center">Ventas</th>
+                                            <th style="width: 100px; text-align: center">Comisiones</th>
+                                            <th style="width: 70px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for v in lista_vendedores %}
+                                            <tr>
+                                                <td>{{ v.0.usuario }}</td>
+                                                <td>{{ v.0.nombre }}</td>
+                                                <td style="text-align: center">$ {{ v.1|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">$ {{ v.2|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center" class="{% if v.3 %}alert alert-danger{% endif %}">$ {{ v.3|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">{{ v.4|floatformat:0 }}</td>
+                                                <td style="text-align: center">$ {{ v.5|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center"><a href="/consultas?action=detalles_vendedor&id={{ v.0.id }}"> Detalles</a></td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="12">
+                                                    No existen datos para vendedores en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

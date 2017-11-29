@@ -1,0 +1,118 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            $("#search").click(function() {
+                var term = $("#searchfield").val().toUpperCase();
+                location.href = "/cajeros?s="+term;
+            });
+
+            $('#searchfield').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#search").trigger("click");
+                }
+            });
+
+            //Activar pestana
+            $("#pestana12").addClass('current');
+
+        });
+
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class="span8">
+            <form class="form-search">
+                <input class='searchinput input-xlarge search-query' type='text' id='searchfield' value='{{ search }}'/>
+                <a href="#" id='search' class='btn btn-success tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                {% if search %}
+                    <a href="/cajeros" id='allresults' class='btn btn-info tr' title="Ver todos"><i class="fa fa-list"></i></a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class='row-fluid'>
+        <div class='span12'>
+            <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <th style="width: 130px">Cedula</th>
+                    <th>Nombre</th>
+                    <th style="width: 450px">Direcci&oacute;n</th>
+                    <th style="width: 300px">Email</th>
+                    <th style="width: 150px">Telef&oacute;no</th>
+                    <th style="width: 150px; text-align: center">Usuario</th>
+                    <th style="width: 80px"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for cajero in cajeros %}
+                    <tr>
+                        <td> {{ cajero.cedula }} </td>
+                        <td> {{ cajero.nombre }} </td>
+                        <td> {{ cajero.direccion }}</td>
+                        <td> {{ cajero.email }} </td>
+                        <td> {{ cajero.telefono }} </td>
+                        <td style="text-align: center"> {{ cajero.usuario }} </td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Acciones
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu pull-right list-group">
+                                    <li><a class="list-group-item" href='/cajeros?action=edit&id={{ cajero.id }}'><i class="fa fa-edit fa-fw"></i>&nbsp; Editar </a></li>
+                                    {% if not cajero.en_uso %}
+                                        <li><a class="list-group-item" href="/cajeros?action=delete&id={{ cajero.id }}"><i class="fa fa-times fa-fw"></i>&nbsp; Eliminar</a></li>
+                                    {% endif %}
+                                    <li><a href="/cajeros?action=resetear&id={{ cajero.id }}"><i class="fa fa-key"></i> Resetear Clave</a> </li>
+                                </ul>
+                            </div>
+
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">
+                            NO EXISTEN CAJEROS EN EL SISTEMA
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class='row-fluid'>
+        <a href="/cajeros?action=add" class='btn btn-turquesa'><i class="fa fa-plus"></i> Adicionar</a>
+    </div>
+    <div class='row-fluid'>
+        {% if paging.num_pages > 20 %}
+            <div class='pagination'>
+                <ul>
+                    {% if paging.primera_pagina %}
+                        <li><a href="/cajeros?page=1">1</a></li>
+                        <li><a href="/cajeros?page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                    {% endif %}
+                    {% for pagenumber in paging.paginas %}
+                        <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/cajeros?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                    {% endfor %}
+                    {% if paging.ultima_pagina %}
+                        <li><a href="/cajeros?page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                        <li><a href="/cajeros?page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% else %}
+            <div class='pagination'>
+                <ul>
+                    {% for pagenumber in paging.page_range %}
+                        <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/cajeros?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

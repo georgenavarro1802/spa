@@ -1,0 +1,25 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+
+            $("#id_descripcion, #id_unidadmedida, #id_tipoproducto, #id_precio").addClass("validate[required]");
+
+            $("#id_precio, #id_minimo, #id_precio_cliente_normal, #id_precio_cliente_corporativo, #id_precio_cliente_vip").blur(function(){
+                numerico($(this), 0, 99999999, 2);
+            });
+
+            //Activar pestana
+            $("#pestana2").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/productos{% endblock %}
+{% block formdestination %}/productos{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='edit'/>
+    <input type='hidden' name='id' value='{{ producto.id }}'/>
+{% endblock %}
+{% block formback %}/productos{% endblock %}

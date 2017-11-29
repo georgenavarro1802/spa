@@ -1,0 +1,36 @@
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th style="width: 100px">Tipo</th>
+        <th style="width: 100px">C&oacute;digo</th>
+        <th>Descripci&oacute;n</th>
+        <th style="width: 100px">Categor&iacute;a</th>
+        <th style="width: 60px; text-align: center">Cant.</th>
+        <th style="width: 80px; text-align: center">Precio</th>
+        <th style="width: 80px; text-align: center">Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for d in detalles %}
+        <tr class="normal11">
+            <td>{% if d.producto %}PRODUCTO{% else %}SERVICIO{% endif %}</td>
+            <td>{% if d.producto %}{{ d.producto.codigo }}{% else %}{{ d.servicio.codigo }}{% endif %}</td>
+            <td>{% if d.producto %}{{ d.producto.descripcion }}{% else %}{{ d.servicio.descripcion }}{% endif %}</td>
+            <td>{% if d.producto %}{{ d.producto.tipoproducto.nombre }}{% else %}{{ d.servicio.tiposervicio.nombre }}{% endif %}</td>
+            <td style="text-align: center">{{ d.cantidad|floatformat:0 }}</td>
+            <td style="text-align: right">${{ d.precio|floatformat:2 }}</td>
+            <td style="text-align: right">${{ d.valor|floatformat:2 }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="6">Iva: <b>${{ orden.iva|floatformat:2 }}</b> &nbsp; Total: <b>${{ orden.total|floatformat:2 }}</b></td>
+        <td style="text-align: right; font-weight: bold">$ {{ orden.subtotal|floatformat:2 }}</td>
+    </tr>
+    </tfoot>
+</table>
+
+{% if orden.observaciones %}
+    <span><b>Observaciones: </b> {{ orden.observaciones }}</span>
+{% endif %}

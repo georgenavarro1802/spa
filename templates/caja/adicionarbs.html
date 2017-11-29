@@ -1,0 +1,24 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+
+            $("#id_fondo").addClass('input-medium').addClass("validate[required]").blur(function(){
+                numerico($(this), 0, 99999999, 2);
+            });
+
+            //Activar pestana
+            $("#pestana3").addClass('current');
+        });
+    </script>
+{% endblock %}
+
+{% block titulo %}{{ title }}: {{ caja }}{% endblock %}
+{% block formaction %}/caja{% endblock %}
+{% block formdestination %}/caja{% endblock %}
+{% block formwidth %}form-s{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='abrirsesion'/>
+{% endblock %}
+{% block formback %}/caja{% endblock %}
+{% block buttonname %}Abrir Sesi&oacute;n{% endblock %}

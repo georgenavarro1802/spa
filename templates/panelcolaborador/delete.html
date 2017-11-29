@@ -1,0 +1,8 @@
+{% extends "ajaxdeletebs.html" %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/panelcolaborador{% endblock %}
+{% block formdestination %}/panelcolaborador?action=missesiones{% endblock %}
+{% block formaction %}/panelcolaborador{% endblock %}
+{% block formactionvalue %}deletesesion{% endblock %}
+{% block formobjectid %}{{ sesion.id }}{% endblock %}
+{% block formobjectname %}la sesi&oacute;n: <b>{{ sesion }}</b>{% endblock %}

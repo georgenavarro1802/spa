@@ -1,0 +1,83 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Activar pestana
+            $("#pestana13").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+        <div class="span10">
+            <h4>Receta del servicio</h4>
+        </div>
+        <div class="span2 atright">
+            <a href="/servicios" class="btn btn-default btn-form"><i class="fa fa-arrow-left"></i> Atr&aacute;s</a>
+        </div>
+    </div>
+    <br/>
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="span4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>Servicio: {{ servicio.codigo }}</h5>
+                    </div>
+                    <div class="panel-body">
+                        <h5>Descripci&oacute;n </h5>
+                        <ul>
+                            <li>{{ servicio.descripcion }}</li>
+                        </ul>
+                    </div>
+                </div>
+                <br/>
+            </div>
+            <div class='span8'>
+                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th style="width: 120px">C&oacute;digo</th>
+                        <th>Descripci&oacute;n</th>
+                        <th style="width: 60px; text-align: center">U.M.</th>
+                        <th style="width: 200px">Categor&iacute;a</th>
+                        <th style="width: 50px"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in receta %}
+                        <tr>
+                            <td>{{ r.producto.codigo }}</td>
+                            <td>{{ r.producto.descripcion }}</td>
+                            <td style="text-align: center">{{ r.producto.unidadmedida }}</td>
+                            <td>{{ r.producto.tipoproducto.nombre }}</td>
+                            <td style="text-align: center">
+                                <a class="list-group-item btn btn-danger btn-mini tl" title="Eliminar" href="/servicios?action=deletereceta&id={{ r.id }}"><i class="fa fa-times fa-fw"></i></a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="10">
+                                NO EXISTEN PRODUCTOS EN LA RECETA PARA EL SERVICIO.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="10">
+                            <a href="/servicios?action=addreceta&id={{ servicio.id }}" style="margin: 0.5em" class="btn btn-turquesa tl" title="Adicionar"><i class="fa fa-plus"></i></a>
+                        </td>
+                    </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

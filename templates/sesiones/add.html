@@ -1,0 +1,55 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <style>
+        #formulary table td input#id_email { text-transform: none; }
+    </style>
+    <script>
+        $(function(){
+            $("#id_factura, #id_paquete, #id_colaborador, #id_cliente, #id_fecha").addClass("validate[required]");
+
+            $("#id_fecha, #id_proxima_cita").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+            $("#id_factura").change(function () {
+                var idfact = $(this).val();
+                if (idfact){
+                    bloqueointerface();
+                    $.ajax({
+                        type: "POST",
+                        url: "/sesiones",
+                        data: {'action': 'get_factura_data', 'idfact': idfact},
+                        success: function(data) {
+                            $.unblockUI();
+                            if (data.result == 'ok') {
+                                $("#id_cliente").val(data.cliente);
+                                $("#id_paquete").val(data.paquete);
+                                $("#id_colaborador").val(data.colaborador);
+                                $("#id_fecha").val(data.fecha);
+                            } else {
+                                smoke.alert(data.mensaje);
+                            }
+                        },
+                        error: function() {
+                            $.unblockUI();
+                            smoke.alert("Error al enviar los datos.");
+                        },
+                        dataType: "json"
+                    });
+                }
+
+            });
+
+            //Activar pestana
+            $("#pestana7").addClass('current');
+
+        });
+
+    </script>
+{% endblock %}
+
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/sesiones{% endblock %}
+{% block formdestination %}/sesiones{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='add'/>
+{% endblock %}
+{% block formback %}/sesiones{% endblock %}

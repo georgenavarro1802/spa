@@ -1,0 +1,136 @@
+<script>
+    $(function () {
+
+        //Ventas Valores
+        $('#contenido1').highcharts({
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: [
+                    {% for v in topten %}
+                        '{{ v.0 }}' {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Ventas ($)'
+                }
+            },
+            tooltip: {
+                headerFormat:   '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat:    '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>$ {point.y:.2f}</b></td></tr>',
+                footerFormat:   '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Enliven',
+                data: [
+                    {% for v in topten %}
+                        {{ v.2 }} {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+
+        //Ventas Cantidad Facturas
+        $('#contenido2').highcharts({
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: [
+                    {% for v in topten %}
+                        '{{ v.0 }}' {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Facturas'
+                }
+            },
+            tooltip: {
+                headerFormat:   '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat:    '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                footerFormat:   '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Enliven',
+                data: [
+                    {% for v in topten %}
+                        {{ v.1 }} {% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }]
+        });
+    });
+</script>
+
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title1 }}</div>
+    <div class="panel-body">
+        <div id="contenido1" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title2 }}</div>
+    <div class="panel-body">
+        <div id="contenido2" style="height: 300px; margin: 0 auto"></div>
+    </div>
+</div>
+<br/>
+<div class="panel panel-turquesa">
+    <div class="panel-heading">{{ title3 }}</div>
+    <div class="panel-body">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="width: 10px"></th>
+                <th>Vendedor</th>
+                <th style="width: 100px; text-align: center">Facturas</th>
+                <th style="width: 150px; text-align: center">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for v in topten %}
+                <tr>
+                    <td style="text-align: center">{{ forloop.counter }}</td>
+                    <td>{{ v.0 }}</td>
+                    <td style="text-align: center">{{ v.1|floatformat:0 }}</td>
+                    <td style="text-align: right">$ {{ v.2|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

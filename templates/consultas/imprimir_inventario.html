@@ -1,0 +1,84 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="author" content="Enliven" />
+
+    <style>
+
+        @page {
+            size: portrait;
+            margin: 1cm 1cm 1cm 1cm;
+            @frame footer {
+            -pdf-frame-content: footerContent;
+            left: 0.5cm;
+            right: 0.5cm;
+            bottom: 0;
+            height: 1cm;
+        }
+        }
+
+    </style>
+</head>
+<body>
+<div>
+    <div>
+        <p style="text-align: right; font-weight: bold">{{ hoy|date:'d-m-Y' }}</p>
+        <p style="text-align: center; color: #000000; line-height: 1em; font-size: 17px; font-weight: normal;">
+            Reporte de Inventarios
+        </p>
+        <br/>
+        <p style="text-align: left; color: #000000; line-height: 1em; font-size: 14px; font-weight: normal;">
+            {% if categoria %}{{ categoria.nombre }}{% else %}TODAS{% endif %}
+        </p>
+        <br/>
+        <table cellpadding="0" cellspacing="0">
+            <thead>
+            <tr style="padding-bottom: 5px">
+                <th style="width: 100px; text-align: left">C&oacute;digo</th>
+                <th style="width: 100px; text-align: left">Cod.Barra</th>
+                <th style="width: 400px; text-align: left">Descripci&oacute;n</th>
+                <th style="width: 40px; text-align: center">UM</th>
+                <th style="width: 60px; text-align: center">Min.</th>
+                <th style="width: 60px; text-align: right">Disp.</th>
+                <th style="width: 70px; text-align: right">Cif</th>
+                <th style="width: 70px; text-align: right">Valor</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for inv in inventarios %}
+                <tr style="padding-bottom: 2px">
+                    <td style="text-align: left">{{ inv.producto.codigo }}</td>
+                    <td style="text-align: left">{{ inv.producto.codigobarra|default_if_none:"" }}</td>
+                    <td style="text-align: left; font-size: 9px">{{ inv.producto.descripcion }}</td>
+                    <td style="text-align: center; font-size: 9px">{{ inv.producto.unidadmedida }}</td>
+                    <td style="text-align: center; font-size: 9px">{{ inv.producto.minimo|floatformat:2 }}</td>
+                    <td style="text-align: right">{{ inv.cantidad|floatformat:2 }}</td>
+                    <td style="text-align: right">$ {{ inv.costo|floatformat:2|intcomma }}</td>
+                    <td style="text-align: right">$ {{ inv.valor|floatformat:2|intcomma }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="12">
+                        No existen inventarios en el sistema
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="padding-top: 10px">
+                    <td colspan="6" style="text-align: right"><i>Totales: </i></td>
+                    <td style="text-align: right; font-weight: bold">$ {{ total_cif|floatformat:2|intcomma }}</td>
+                    <td style="text-align: right; font-weight: bold">$ {{ total_valor|floatformat:2|intcomma }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div id="footerContent" style="text-align: right;">
+        P&aacute;gina: <pdf:pagenumber>
+    </div>
+</div>
+</body>
+</html>

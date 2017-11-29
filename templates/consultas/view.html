@@ -1,0 +1,1231 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            // Busqueda en Ventas
+            $("#searchv").click(function() {
+                location.href = "/consultas?tab=1&sv="+$("#searchfieldv").val().toUpperCase();
+            });
+            $('#searchfieldv').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchv").trigger("click");
+                }
+            });
+
+            //Detalles factura
+            $("#detalle_factura .btn-aceptar").click(function(){
+                $("#detalle_factura").modal("hide");
+                return false;
+            });
+
+            $(".detallefact").click(function() {
+                var fid = $(this).attr("fid");
+                var num_fact = $(this).attr("num_fact");
+                $.get("/consultas", {'action':'detalle_factura', 'fid': fid}, function(data) {
+                    $("#num_factura").html(num_fact);
+                    $("#detalle_factura .modal-body").html(data);
+                    $("#detalle_factura").modal({"backdrop":"static", "width": "800px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            // Busqueda en Compras
+            $("#searchc").click(function() {
+                location.href = "/consultas?tab=2&sc="+$("#searchfieldc").val().toUpperCase();
+            });
+            $('#searchfieldc').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchc").trigger("click");
+                }
+            });
+
+            //Detalles compra
+            $("#detalle_compra .btn-aceptar").click(function(){
+                $("#detalle_compra").modal("hide");
+                return false;
+            });
+
+            $(".detallecomp").click(function() {
+                var cid = $(this).attr("cid");
+                var num_doc = $(this).attr("num_doc");
+                $.get("/consultas", {'action':'detalle_compra', 'cid': cid}, function(data) {
+                    $("#num_doc").html(num_doc);
+                    $("#detalle_compra .modal-body").html(data);
+                    $("#detalle_compra").modal({"backdrop":"static", "width": "1100px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            //Detalles solicitud de compra Clientes
+            $("#detalle_solicitudc .btn-aceptar").click(function(){
+                $("#detalle_solicitudc").modal("hide");
+                return false;
+            });
+
+            $(".detallesolc").click(function() {
+                var scid = $(this).attr("scid");
+                var num_solc = $(this).attr("numsc");
+                var nombre_cliente = $(this).attr("nombrecli");
+                $.get("/consultas", {'action':'detalle_solicitud_cliente', 'scid': scid}, function(data) {
+                    $("#num_solc").html(num_solc);
+                    $("#cliente_solc").html(nombre_cliente);
+                    $("#detalle_solicitudc .modal-body").html(data);
+                    $("#detalle_solicitudc").modal({"backdrop":"static", "width": "1100px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            //Detalles solicitud de compra Vendedores
+            $("#detalle_solicitudv .btn-aceptar").click(function(){
+                $("#detalle_solicitudv").modal("hide");
+                return false;
+            });
+
+            $(".detallesolv").click(function() {
+                var svid = $(this).attr("svid");
+                var num_solv = $(this).attr("numsv");
+                var nombre_vendedor = $(this).attr("nombrevend");
+                $.get("/consultas", {'action':'detalle_solicitud_vendedor', 'svid': svid}, function(data) {
+                    $("#num_solv").html(num_solv);
+                    $("#vendedor_solv").html(nombre_vendedor);
+                    $("#detalle_solicitudv .modal-body").html(data);
+                    $("#detalle_solicitudv").modal({"backdrop":"static", "width": "1100px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            // Aprobar o Denegar Solicitudes Clientes y Vendedores
+            $(".btn-aprobarsc").click(function() {
+                bloqueointerface();
+                $.post("/consultas", {'action':'aprobar_solicitud_cliente', 'scid': $(this).attr("scid")}, function(data) {
+                    if (data.result == 'ok'){
+                        location.href = "/consultas?tab=9";
+                    }else{
+                        $.unblockUI();
+                        smoke.alert(data.mensaje);
+                    }
+                }, "json");
+                return false;
+            });
+
+            $(".btn-aprobarsv").click(function() {
+                bloqueointerface();
+                $.post("/consultas", {'action':'aprobar_solicitud_vendedor', 'svid': $(this).attr("svid")}, function(data) {
+                    if (data.result == 'ok'){
+                        location.href = "/consultas?tab=10";
+                    }else{
+                        $.unblockUI();
+                        smoke.alert(data.mensaje);
+                    }
+                }, "json");
+                return false;
+            });
+
+            $(".btn-denegarsc").click(function() {
+                bloqueointerface();
+                $.post("/consultas", {'action':'denegar_solicitud_cliente', 'scid': $(this).attr("scid")}, function(data) {
+                    if (data.result == 'ok'){
+                        location.href = "/consultas?tab=9";
+                    }else{
+                        $.unblockUI();
+                        smoke.alert(data.mensaje);
+                    }
+                }, "json");
+                return false;
+            });
+
+            $(".btn-denegarsv").click(function() {
+                bloqueointerface();
+                $.post("/consultas", {'action':'denegar_solicitud_vendedor', 'svid': $(this).attr("svid")}, function(data) {
+                    if (data.result == 'ok'){
+                        location.href = "/consultas?tab=10";
+                    }else{
+                        $.unblockUI();
+                        smoke.alert(data.mensaje);
+                    }
+                }, "json");
+                return false;
+            });
+
+            // Busqueda en Pagos
+            $("#searchp").click(function() {
+                location.href = "/consultas?tab=3&sp="+$("#searchfieldp").val().toUpperCase();
+            });
+            $('#searchfieldp').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchp").trigger("click");
+                }
+            });
+
+            // Busqueda en Inventarios
+            $("#searchi").click(function() {
+                location.href = "/consultas?tab=4&si="+$("#searchfieldi").val().toUpperCase();
+            });
+            $('#searchfieldi').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchi").trigger("click");
+                }
+            });
+
+            $("#inventariocategoria").change(function () {
+                bloqueointerface();
+                var categoriaid = $(this).val();
+                if (categoriaid > 0){
+                    location.href = '/consultas?tab=4&cid='+categoriaid;
+                }else{
+                    location.href = '/consultas?tab=4';
+                }
+            });
+
+            $("#inventarioarea").change(function () {
+                bloqueointerface();
+                var areaid = $(this).val();
+                if (areaid > 0){
+                    location.href = '/consultas?tab=4&aid='+areaid;
+                }else{
+                    location.href = '/consultas?tab=4';
+                }
+            });
+
+            $("#imprimir_inventario").click(function(){
+                var cid = $("#inventariocategoria").val();
+                location.href = '/consultas?action=imprimir_inventario&cid='+cid;
+            });
+
+            // Busqueda en Historial CIF
+            $("#searchcif").click(function() {
+                location.href = "/consultas?tab=5&scif="+$("#searchfieldcif").val().toUpperCase();
+            });
+            $('#searchfieldcif').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchcif").trigger("click");
+                }
+            });
+
+            // Busqueda en Historial Precios
+            $("#searchprecios").click(function() {
+                location.href = "/consultas?tab=7&sprecios="+$("#searchfieldprecios").val().toUpperCase();
+            });
+            $('#searchfieldprecios').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchprecios").trigger("click");
+                }
+            });
+
+            // Imprimir factura
+            $(".imprimir").click(function(){
+                bloqueointerface();
+                var fid = $(this).attr('fid');
+                $.post("/consultas", {'action': 'imprimir_factura', 'fid': fid}, function(data) {
+                    $.unblockUI();
+                    if (data.result=='ok' && data.reportfile){
+                        window.open(data.reportfile);
+                        location.href = '/consultas?tab=1';
+                    }
+                    else{
+                        smoke.alert("Error al intentar imprimir");
+                    }
+                }, "json");
+                return false;
+            });
+
+            //Activar Tabs de acuerdo a busquedas
+            $("#myTab").find("li").removeClass('active');
+            $(".tab-pane").removeClass('active');
+            $("#tab"+{{ tab }}).addClass('active');
+            $("#t"+{{ tab }}).addClass('active');
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div>
+                <ul class="nav nav-tabs" id="myTab">
+                    <li id="tab1" style="margin-right: 5px" class="active"><a href="#t1" data-toggle="tab"><h3>Ventas</h3></a></li>
+                    <li id="tab2" style="margin-right: 5px"><a href="#t2" data-toggle="tab"><h3>Compras</h3></a></li>
+                    <li id="tab3" style="margin-right: 5px"><a href="#t3" data-toggle="tab"><h3>Cobros</h3></a></li>
+                    <li id="tab4" style="margin-right: 5px"><a href="#t4" data-toggle="tab"><h3>Inventarios</h3></a></li>
+                    <li id="tab6" style="margin-right: 5px"><a href="#t6" data-toggle="tab"><h3>Cajeros</h3></a></li>
+                    <li id="tab8" style="margin-right: 5px"><a href="#t8" data-toggle="tab"><h3>Vendedores</h3></a></li>
+                    <li id="tab9" style="margin-right: 5px"><a href="#t9" data-toggle="tab"><h3>Solicitudes Clientes</h3></a></li>
+                    <li id="tab5" style="margin-right: 5px"><a href="#t5" data-toggle="tab"><h3>Historial Costos</h3></a></li>
+                    <li id="tab7" style="margin-right: 5px"><a href="#t7" data-toggle="tab"><h3>Historial Precios</h3></a></li>
+                    {#                    <li id="tab10" style="margin-right: 5px"><a href="#t10" data-toggle="tab"><h3>Solicitudes Vendedores</h3></a></li>#}
+                </ul>
+                <div class="tab-content">
+
+                    {#   V E N T A S   #}
+                    <div class="tab-pane active" id="t1">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row-fluid atright">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldv' value='{{ searchv }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchv' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchv %}
+                                            <a href="/consultas?tab=1" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 50px">Cod.</th>
+                                            <th style="width: 90px">Fecha</th>
+                                            <th style="width: 120px"># Documento</th>
+                                            <th>Cliente</th>
+                                            <th style="width: 80px; text-align: center">SubTotal</th>
+                                            <th style="width: 80px; text-align: center">Iva</th>
+                                            <th style="width: 80px; text-align: center">Total</th>
+                                            <th style="width: 80px; text-align: center">Pagado</th>
+                                            <th style="width: 80px; text-align: center">Pendiente</th>
+                                            <th style="width: 50px; text-align: center">Items</th>
+                                            <th style="width: 120px; text-align: center">Vendedor</th>
+                                            <th style="width: 70px; text-align: center">Estado</th>
+                                            <th style="width: 90px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for v in ventas %}
+                                            <tr>
+                                                <td>{{ v.repr_id }}</td>
+                                                <td>{{ v.fecha|date:'d-m-Y' }}</td>
+                                                <td>{{ v.numero }}</td>
+                                                <td>{{ v.cliente.nombre }}</td>
+                                                <td style="text-align: center">${{ v.subtotal|floatformat:2 }}</td>
+                                                <td style="text-align: center">${{ v.iva|floatformat:2 }}</td>
+                                                <td style="text-align: center">${{ v.total|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">${{ v.pagado|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">
+                                                    {% if v.saldo_pendiente %}
+                                                        ${{ v.saldo_pendiente|floatformat:2|intcomma }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td style="text-align: center">{{ v.cantidad_productos|floatformat:0 }}</td>
+                                                <td style="text-align: center">
+                                                    <span class="tl" title="{{ v.vendedor.nombre }}"> {{ v.vendedor.usuario }}</span>
+                                                </td>
+                                                <td style="text-align: center">
+                                                    {% if v.cancelada %}
+                                                        <label class="label label-success"> Cancelada</label>
+                                                    {% endif %}
+                                                    {% if not v.valida %}
+                                                        <label class="label label-important"> Anulada</label>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="text-align: center">
+                                                    <a class="btn btn-info btn-mini detallefact tl" title="Detalles" href='#' fid="{{ v.id }}" num_fact="{{ v.numero }}"> <i class='fa fa-list'></i> </a>
+                                                    {% if v.valida and v.puede_anular %}
+                                                        <a class="btn btn-danger btn-mini btn-form tl" title="Anular" href='/consultas?action=anular_factura&id={{ v.id }}' pid="{{ v.id }}"><i class='fa fa-minus'></i> </a>
+                                                    {% endif %}
+                                                    <a class="btn btn-mini btn-warning tl imprimir" title="Reimprimir" href='#' fid="{{ v.id }}"><i class='fa fa-print'></i> </a>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen ventas en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if pagingv.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if pagingv.primera_pagina %}
+                                                <li><a href="/facturas?page=1">1</a></li>
+                                                <li><a href="/facturas?page={{ pagingv.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in pagingv.paginas %}
+                                                <li {% ifequal pagenumber pagev.number %}class='active'{% endifequal %}><a href="/facturas?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if pagingv.ultima_pagina %}
+                                                <li><a href="/facturas?page={{ pagingv.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/facturas?page={{ pagingv.num_pages }}">{{ pagingv.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in pagingv.page_range %}
+                                                <li {% ifequal pagenumber pagev.number %}class='active'{% endifequal %}><a href="/facturas?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {#  C O M P R A S   #}
+                    <div class="tab-pane" id="t2">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row-fluid atright">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldc' value='{{ searchc }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchc' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchc %}
+                                            <a href="/consultas?tab=2" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 40px">Cod.</th>
+                                            <th style="width: 100px">Fecha</th>
+                                            <th style="width: 150px">Tipo Documento</th>
+                                            <th style="width: 150px"># Documento</th>
+                                            <th>Proveedor</th>
+                                            <th style="width: 100px; text-align: center">Fecha Doc.</th>
+                                            <th style="width: 80px; text-align: center">Valor CIF</th>
+                                            <th style="width: 350px">Descripci&oacute;n</th>
+                                            <th style="width: 50px; text-align: center">Items</th>
+                                            <th style="width: 50px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for c in compras %}
+                                            <tr>
+                                                <td>{{ c.repr_id }}</td>
+                                                <td>{{ c.fecha|date:'d-m-Y' }}</td>
+                                                <td>{{ c.tipodocumento.nombre }}</td>
+                                                <td>{{ c.numerodocumento }}</td>
+                                                <td>{{ c.proveedor.nombre }}</td>
+                                                <td style="text-align: center">{{ c.fechadocumento|date:'d-m-Y' }}</td>
+                                                <td style="text-align: center">$ {{ c.valor|floatformat:2 }}</td>
+                                                <td>{{ c.descripcion }}</td>
+                                                <td style="text-align: center">{{ c.cantidad_productos|floatformat:0 }}</td>
+                                                <td style="text-align: center">
+                                                    <a class="btn btn-info btn-mini detallecomp tl" title="Detalles" href='#' cid="{{ c.id }}" num_doc="{% if c.numerodocumento %}{{ c.numerodocumento }}{% else %} #{{ c.id }} (migracion){% endif %}"> <i class='fa fa-list'></i> </a>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen compras en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if pagingc.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if pagingc.primera_pagina %}
+                                                <li><a href="/facturas?page=1">1</a></li>
+                                                <li><a href="/facturas?page={{ pagingc.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in pagingc.paginas %}
+                                                <li {% ifequal pagenumber pagec.number %}class='active'{% endifequal %}><a href="/facturas?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if pagingc.ultima_pagina %}
+                                                <li><a href="/facturas?page={{ pagingc.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/facturas?page={{ pagingc.num_pages }}">{{ pagingc.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in pagingc.page_range %}
+                                                <li {% ifequal pagenumber pagec.number %}class='active'{% endifequal %}><a href="/facturas?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {#  P A G O S   #}
+                    <div class="tab-pane" id="t3">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row-fluid atright">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldp' value='{{ searchp }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchp' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchp %}
+                                            <a href="/consultas?tab=3" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 60px">Cod.</th>
+                                            <th style="width: 100px">Tipo</th>
+                                            <th style="width: 80px">#Factura</th>
+                                            <th>Cliente</th>
+                                            <th style="width: 100px; text-align: center">Fecha</th>
+                                            <th style="width: 80px; text-align: center">Valor</th>
+                                            <th style="width: 100px">Referencia</th>
+                                            <th style="width: 140px">Posee/Efectua</th>
+                                            <th style="width: 120px">Banco</th>
+                                            <th style="width: 50px">Depos.?</th>
+                                            <th style="width: 80px; text-align: center">Fecha.Dep.</th>
+                                            <th style="width: 50px">Post.?</th>
+                                            <th style="width: 100px">Tarjeta</th>
+                                            <th style="width: 100px">Procesador</th>
+                                            <th style="width: 60px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for p in pagos %}
+                                            <tr>
+                                                <td>{{ p.repr_id }}</td>
+                                                <td style="color: #fff; font-weight: bold">
+                                                    <span class="label {% if p.es_efectivo %}label-success{% elif p.es_cheque %}label-info{% elif p.es_deposito %}label-warning{% elif p.es_transferencia %}label-warning{% elif p.es_tarjeta %}label-inverse{% elif p.es_retencion %}label-default{% endif %}">{{ p.tipo }}</span>
+                                                </td>
+                                                <td>{{ p.factura.numero }}</td>
+                                                <td>{{ p.factura.cliente.nombre }}</td>
+                                                <td style="text-align: center">{{ p.fecha|date:'d-m-Y' }}</td>
+                                                <td style="text-align: center">${{ p.valor|floatformat:2|intcomma }}</td>
+
+                                                <td>
+                                                    {% if p.es_cheque %}
+                                                        {{ p.pago_cheque.numero }}
+                                                    {% elif p.es_deposito %}
+                                                        {{ p.pago_deposito.numero }}
+                                                    {% elif p.es_transferencia %}
+                                                        {{ p.pago_transferencia.numero }}
+                                                    {% elif p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.referencia }}
+                                                    {% elif p.es_retencion %}
+                                                        {{ p.pago_retencion.numero }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if p.es_cheque %}
+                                                        {{ p.pago_cheque.emite }}
+                                                    {% elif p.es_deposito %}
+                                                        {{ p.pago_deposito.efectuadopor }}
+                                                    {% elif p.es_transferencia %}
+                                                        {{ p.pago_transferencia.efectuadopor }}
+                                                    {% elif p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.poseedor }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if p.es_cheque %}
+                                                        {{ p.pago_cheque.banco }}
+                                                    {% elif p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.banco }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque and p.pago_cheque.depositado %}
+                                                        <i class="fa fa-check tl" title="Depositado"></i>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque and p.pago_cheque.depositado %}
+                                                        {{ p.pago_cheque.fechadepositado|date:'d-m-Y' }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque and p.pago_cheque.postfechado %}
+                                                        <i class="fa fa-check tl" title="Postfechado"></i>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.tipotarjeta }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.procesadorpago }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque %}
+                                                        {% if not p.pago_cheque.protestado %}
+                                                            {% if not p.pago_cheque.depositado %}
+                                                                <a href="/consultas?action=depositar_cheque&id={{ p.id }}" class="btn btn-warning btn-mini tl" title="Depositar"><i class="fa fa-money"></i></a>
+                                                            {% endif %}
+                                                            <a href="/consultas?action=protestar_cheque&id={{ p.id }}" class="btn btn-danger btn-mini btn-form tl" title="Protestar"><i class="fa fa-refresh"></i></a>
+                                                        {% else %}
+                                                            <label class="label label-important"> PROTESTADO</label>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen pagos en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if pagingp.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if pagingp.primera_pagina %}
+                                                <li><a href="/facturas?page=1">1</a></li>
+                                                <li><a href="/facturas?page={{ pagingp.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in pagingp.paginas %}
+                                                <li {% ifequal pagenumber pagep.number %}class='active'{% endifequal %}><a href="/facturas?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if pagingp.ultima_pagina %}
+                                                <li><a href="/facturas?page={{ pagingp.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/facturas?page={{ pagingp.num_pages }}">{{ pagingp.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in pagingp.page_range %}
+                                                <li {% ifequal pagenumber pagep.number %}class='active'{% endifequal %}><a href="/facturas?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {#  I N V E N T A R I O S  #}
+                    <div class="tab-pane" id="t4">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row-fluid">
+                                        {% if not es_cajero %}
+                                            <div style="float: left">
+                                                <select id="inventarioarea" class="input-xlarge" style="height: 30px; margin-top: 5px">
+                                                    <option value="0">-----</option>
+                                                    {% for a in areas %}
+                                                        <option value="{{ a.id }}" {% if a.id == area.id %}selected="selected"{% endif %}>{{ a }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        {% endif %}
+                                        <div style="float: left; margin-left: 20px">
+                                            <select id="inventariocategoria" class="input-xlarge" style="height: 30px; margin-top: 5px">
+                                                <option value="0">-----</option>
+                                                {% for t in tipos_producto %}
+                                                    <option value="{{ t.id }}" {% if t.id == categoria.id %}selected="selected"{% endif %}>{{ t }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <a href="#" class='btn btn-success tl' title="Imprimir" id="imprimir_inventario"><i class="fa fa-print"></i></a>
+                                        </div>
+                                        <div class="atright">
+                                            <input class='searchinput input-xlarge search-query' style="height: 30px; margin-top: 5px; text-transform: uppercase" type='text' id='searchfieldi' value='{{ searchi }}'/>
+                                            <a href="#" id='searchi' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                            {% if searchi %}
+                                                <a href="/consultas?tab=4" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 50px"></th>
+                                            <th style="width: 130px">C&oacute;digo</th>
+                                            <th>Descripci&oacute;n</th>
+                                            <th style="width: 250px">Proveedor</th>
+                                            <th style="width: 250px">Tipo</th>
+                                            <th style="width: 50px; text-align: center">UM</th>
+                                            <th style="width: 70px; text-align: center">M&iacute;n</th>
+                                            <th style="width: 70px; text-align: center">Cant.</th>
+                                            <th style="width: 70px; text-align: center">Costo</th>
+                                            <th style="width: 70px; text-align: center">Valor</th>
+                                            <th style="width: 250px; text-align: center">Area</th>
+                                            <th style="width: 30px; text-align: center"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for inv in inventarios %}
+                                            <tr {% if not inv.cantidad %}class="alert alert-danger"{% endif %}>
+                                                <td style="text-align: center">
+                                                    <a href='{% if inv.producto.foto %}{{ inv.producto.download_foto }}{% endif %}' class="{% if inv.producto.foto %}fancybox{% endif %}" rel="group">
+                                                        <img src="{{ inv.producto.download_foto }}" width="20px" height="20px">
+                                                    </a>
+                                                </td>
+                                                <td class='tnumero'>{{ inv.producto.codigo }}</td>
+                                                <td>{{ inv.producto.descripcion }}</td>
+                                                <td>{{ inv.producto.proveedor|default_if_none:'' }}</td>
+                                                <td>{{ inv.producto.tipoproducto.nombre }}</td>
+                                                <td style="text-align: center">{{ inv.producto.unidadmedida }}</td>
+                                                <td style="text-align: center">{{ inv.producto.minimo|floatformat:2 }}</td>
+                                                <td style="text-align: center">
+                                                    {{ inv.cantidad|floatformat:2 }}
+                                                    {% if inv.esta_bajo_minimo and inv.cantidad %}<span class="tl" title="Inventario bajo m&iacute;nimo"><img src="/static/images/alerta_inventario.gif" width="20" height="18" style="vertical-align: bottom"></span>{% endif %}
+                                                </td>
+                                                <td style="text-align: right">$ {{ inv.costo|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: right">$ {{ inv.valor|floatformat:2|intcomma }}</td>
+                                                <td>{{ inv.area }}</td>
+                                                <td style="text-align: center">
+                                                    <a href="/consultas?action=trasladoinv&id={{ inv.id }}" class="btn btn-form btn-info btn-mini tl" title="Traslado"><i class="fa fa-arrow-right"></i></a>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen inventarios en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if pagingi.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if pagingi.primera_pagina %}
+                                                <li><a href="/facturas?page=1">1</a></li>
+                                                <li><a href="/facturas?page={{ pagingi.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in pagingi.paginas %}
+                                                <li {% ifequal pagenumber pagei.number %}class='active'{% endifequal %}><a href="/facturas?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if pagingi.ultima_pagina %}
+                                                <li><a href="/facturas?page={{ pagingi.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/facturas?page={{ pagingi.num_pages }}">{{ pagingi.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in pagingi.page_range %}
+                                                <li {% ifequal pagenumber pagei.number %}class='active'{% endifequal %}><a href="/facturas?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {#  HISTORIAL  C O S T O S   #}
+                    <div class="tab-pane" id="t5">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row-fluid atright">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldcif' value='{{ searchcif }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchcif' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchcif %}
+                                            <a href="/consultas?tab=5" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 40px">Cod.</th>
+                                            <th style="width: 80px; text-align: center">Fecha</th>
+                                            <th>Producto</th>
+                                            <th style="width: 80px">Cod. Compra</th>
+                                            <th style="width: 150px"># Documento</th>
+                                            <th style="width: 200px">Proveedor</th>
+                                            <th style="width: 80px; text-align: center">Usuario</th>
+                                            <th style="width: 80px; text-align: center">CIF</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for h in historial_cif %}
+                                            <tr>
+                                                <td>{{ h.repr_id }}</td>
+                                                <td style="text-align: center">{{ h.fecha|date:'d-m-Y' }}</td>
+                                                <td>{{ h.producto.nombre_corto }}</td>
+                                                <td style="text-align: center">{{ h.compra.repr_id }}</td>
+                                                <td>{{ h.compra.numerodocumento }}</td>
+                                                <td>{{ h.compra.proveedor.nombre|slice:":20" }}</td>
+                                                <td style="text-align: center">{{ h.usuario }}</td>
+                                                <td style="text-align: center">${{ h.cif|floatformat:2 }}</td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen movimientos de costos CIF en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if pagingcif.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if pagingcif.primera_pagina %}
+                                                <li><a href="/facturas?page=1">1</a></li>
+                                                <li><a href="/facturas?page={{ pagingcif.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in pagingcif.paginas %}
+                                                <li {% ifequal pagenumber pagecif.number %}class='active'{% endifequal %}><a href="/facturas?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if pagingcif.ultima_pagina %}
+                                                <li><a href="/facturas?page={{ pagingcif.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/facturas?page={{ pagingcif.num_pages }}">{{ pagingcif.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in pagingcif.page_range %}
+                                                <li {% ifequal pagenumber pagecif.number %}class='active'{% endifequal %}><a href="/facturas?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {#  HISTORIAL  P R E C I O S   #}
+                    <div class="tab-pane" id="t7">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="row-fluid atright">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldprecios' value='{{ searchprecios }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchprecios' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchprecios %}
+                                            <a href="/consultas?tab=7" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 40px">Cod.</th>
+                                            <th style="width: 100px; text-align: center">Fecha</th>
+                                            <th>Producto</th>
+                                            <th style="width: 100px; text-align: center">Usuario</th>
+                                            <th style="width: 100px; text-align: center">Precio</th>
+                                            <th style="width: 100px; text-align: center">M&oacute;dulo</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for h in historial_precios %}
+                                            <tr>
+                                                <td>{{ h.repr_id }}</td>
+                                                <td style="text-align: center">{{ h.fecha|date:'d-m-Y' }}</td>
+                                                <td>{{ h.producto.nombre_corto }}</td>
+                                                <td style="text-align: center">{{ h.usuario }}</td>
+                                                <td style="text-align: center">${{ h.precio|floatformat:2 }}</td>
+                                                <td style="text-align: center">
+                                                    {% if h.modulo == 'C' %}
+                                                        Compras
+                                                    {% elif h.modulo == 'V' %}
+                                                        Ventas
+                                                    {% else %}
+                                                        Productos
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen movimientos de precios en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if pagingprecios.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if pagingprecios.primera_pagina %}
+                                                <li><a href="/facturas?page=1">1</a></li>
+                                                <li><a href="/facturas?page={{ pagingprecios.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in pagingprecios.paginas %}
+                                                <li {% ifequal pagenumber pageprecios.number %}class='active'{% endifequal %}><a href="/facturas?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if pagingprecios.ultima_pagina %}
+                                                <li><a href="/facturas?page={{ pagingprecios.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/facturas?page={{ pagingprecios.num_pages }}">{{ pagingprecios.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in pagingprecios.page_range %}
+                                                <li {% ifequal pagenumber pageprecios.number %}class='active'{% endifequal %}><a href="/facturas?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {#   C A J E R O S  #}
+                    <div class="tab-pane active" id="t6">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    Resumen general de Ventas y Cobros por cajeros
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 150px">Usuario</th>
+                                            <th>Nombre</th>
+                                            <th style="width: 100px; text-align: center">Facturado</th>
+                                            <th style="width: 100px; text-align: center">Cobrado</th>
+                                            <th style="width: 100px; text-align: center">Pendiente</th>
+                                            <th style="width: 100px; text-align: center">Ventas</th>
+                                            <th style="width: 100px; text-align: center">Comisiones</th>
+                                            <th style="width: 70px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for c in lista_cajeros %}
+                                            <tr>
+                                                <td>{{ c.0.usuario }}</td>
+                                                <td>{{ c.0.nombre }}</td>
+                                                <td style="text-align: center">$ {{ c.1|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">$ {{ c.2|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center" class="{% if c.3 %}alert alert-danger{% endif %}">$ {{ c.3|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">{{ c.4|floatformat:0 }}</td>
+                                                <td style="text-align: center">$ {{ c.5|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center"><a href="/consultas?action=detalles_cajero&id={{ c.0.id }}"> Detalles</a></td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen datos asociados a los cajeros en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% if lista_sesiones_cajeros %}
+                            <div class='row-fluid'>
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">
+                                        Sesiones de caja activas
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                            <thead>
+                                            <tr>
+                                                <th style="width: 150px">Usuario</th>
+                                                <th>Nombre</th>
+                                                <th style="width: 100px; text-align: center">Facturado</th>
+                                                <th style="width: 100px; text-align: center">Cobrado</th>
+                                                <th style="width: 100px; text-align: center">Pendiente</th>
+                                                <th style="width: 100px; text-align: center">Ventas</th>
+                                                <th style="width: 100px; text-align: center">Comisiones</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for s in lista_sesiones_cajeros %}
+                                                <tr>
+                                                    <td>{{ s.0.usuario }}</td>
+                                                    <td>{{ s.0.nombre }}</td>
+                                                    <td style="text-align: center">$ {{ s.1|floatformat:2|intcomma }}</td>
+                                                    <td style="text-align: center">$ {{ s.2|floatformat:2|intcomma }}</td>
+                                                    <td style="text-align: center" class="{% if s.3 %}alert alert-danger{% endif %}">$ {{ s.3|floatformat:2|intcomma }}</td>
+                                                    <td style="text-align: center">{{ s.4|floatformat:0 }}</td>
+                                                    <td style="text-align: center">$ {{ s.5|floatformat:2|intcomma }}</td>
+                                                </tr>
+                                            {% empty %}
+                                                <tr>
+                                                    <td colspan="10">
+                                                        No existen datos de sesiones de cajas
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {#   V E N D E D O R E S   #}
+                    <div class="tab-pane active" id="t8">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    Resumen general de Ventas y Cobros por vendedores
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 150px">Usuario</th>
+                                            <th>Nombre</th>
+                                            <th style="width: 100px; text-align: center">Facturado</th>
+                                            <th style="width: 100px; text-align: center">Cobrado</th>
+                                            <th style="width: 100px; text-align: center">Pendiente</th>
+                                            <th style="width: 100px; text-align: center">Ventas</th>
+                                            <th style="width: 100px; text-align: center">Comisiones</th>
+                                            <th style="width: 70px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for v in lista_vendedores %}
+                                            <tr>
+                                                <td>{{ v.0.usuario }}</td>
+                                                <td>{{ v.0.nombre }}</td>
+                                                <td style="text-align: center">$ {{ v.1|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">$ {{ v.2|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center" class="{% if v.3 %}alert alert-danger{% endif %}">$ {{ v.3|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center">{{ v.4|floatformat:0 }}</td>
+                                                <td style="text-align: center">$ {{ v.5|floatformat:2|intcomma }}</td>
+                                                <td style="text-align: center"><a href="/consultas?action=detalles_vendedor&id={{ v.0.id }}"> Detalles</a></td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen datos para vendedores en el sistema
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {#   SOLICITUDES C L I E N T E S   #}
+                    <div class="tab-pane active" id="t9">
+                        <div class='row-fluid'>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    Solicitudes generadas por los clientes
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th style="width: 170px; text-align: center">Fecha</th>
+                                            <th style="width: 100px; text-align: center">SubTotal</th>
+                                            <th style="width: 100px; text-align: center">IVA</th>
+                                            <th style="width: 100px; text-align: center">Total</th>
+                                            <th style="width: 100px; text-align: center">Estado</th>
+                                            <th style="width: 80px; text-align: center">Venta</th>
+                                            <th style="width: 80px; text-align: center">Fecha Vta.</th>
+                                            <th style="width: 100px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for sc in solicitudes_clientes %}
+                                            <tr>
+                                                <td>{{ sc.cliente }} </td>
+                                                <td style="text-align: center"> {{ sc.fecha|date:'d-m-Y' }}</td>
+                                                <td style="text-align: right"> ${{ sc.subtotal|floatformat:2 }}</td>
+                                                <td style="text-align: right"> ${{ sc.iva|floatformat:2 }}</td>
+                                                <td style="text-align: right"> ${{ sc.total|floatformat:2 }}</td>
+                                                <td style="text-align: center">
+                                                    <label class="label {% if sc.estado == 1 %}label-info{% elif sc.estado == 2 %}label-important{% elif sc.estado == 3 %}label-success{% else %}label-warning{% endif %}">
+                                                        {{ sc.get_estado_display }}
+                                                    </label>
+                                                </td>
+                                                <td style="text-align: center">{{ sc.factura_asignada.numero|default_if_none:'' }}</td>
+                                                <td style="text-align: center">{{ sc.fecha_asignada|date:'d-m-Y' }}</td>
+                                                <td style="text-align: center">
+                                                    <a class="btn btn-mini btn-info detallesolc tl" title="Detalles" href='#' scid="{{ sc.id }}" numsc="{{ sc.repr_id }}" nombrecli="{{ sc.cliente }}"><i class="fa fa-list"></i></a>
+                                                    <a class="btn btn-mini btn-success tl btn-aprobarsc" title="Aprobar" href='#' scid="{{ sc.id }}"><i class="fa fa-check"></i></a>
+                                                    <a class="btn btn-mini btn-danger tl btn-denegarsc" title="Denegar" href='#' scid="{{ sc.id }}"><i class="fa fa-times"></i></a>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="15">
+                                                    No existen solicitudes de clientes
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {#   SOLICITUDES V E N D E D O R E S   #}
+                    {#                    <div class="tab-pane active" id="t10">#}
+                    {#                        <div class='row-fluid'>#}
+                    {#                            <div class="panel panel-primary">#}
+                    {#                                <div class="panel-heading">#}
+                    {#                                    Solicitudes generadas por los vendedores#}
+                    {#                                </div>#}
+                    {#                                <div class="panel-body">#}
+                    {#                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">#}
+                    {#                                        <thead>#}
+                    {#                                        <tr>#}
+                    {#                                            <th style="width: 450px">Vendedor</th>#}
+                    {#                                            <th>Cliente</th>#}
+                    {#                                            <th style="width: 120px; text-align: center">Fecha</th>#}
+                    {#                                            <th style="width: 100px; text-align: center">SubTotal</th>#}
+                    {#                                            <th style="width: 100px; text-align: center">IVA</th>#}
+                    {#                                            <th style="width: 100px; text-align: center">Total</th>#}
+                    {#                                            <th style="width: 100px; text-align: center">Estado</th>#}
+                    {#                                            <th style="width: 100px; text-align: center">Venta</th>#}
+                    {#                                            <th style="width: 100px; text-align: center">Fecha Vta.</th>#}
+                    {#                                            <th style="width: 100px"></th>#}
+                    {#                                        </tr>#}
+                    {#                                        </thead>#}
+                    {#                                        <tbody>#}
+                    {#                                        {% for sv in solicitudes_vendedores %}#}
+                    {#                                            <tr>#}
+                    {#                                                <td>{{ sv.vendedor }}</td>#}
+                    {#                                                <td>{{ sv.cliente }} </td>#}
+                    {#                                                <td style="text-align: center"> {{ sv.fecha|date:'d-m-Y' }}</td>#}
+                    {#                                                <td style="text-align: right"> ${{ sv.subtotal|floatformat:2 }}</td>#}
+                    {#                                                <td style="text-align: right"> ${{ sv.iva|floatformat:2 }}</td>#}
+                    {#                                                <td style="text-align: right"> ${{ sv.total|floatformat:2 }}</td>#}
+                    {#                                                <td style="text-align: center">#}
+                    {#                                                    <label class="label {% if sv.estado == 1 %}label-info{% elif sv.estado == 2 %}label-important{% elif sv.estado == 3 %}label-success{% else %}label-warning{% endif %}">#}
+                    {#                                                        {{ sv.get_estado_display }}#}
+                    {#                                                    </label>#}
+                    {#                                                </td>#}
+                    {#                                                <td style="text-align: center">{{ sc.factura_asignada.numero|default_if_none:'' }}</td>#}
+                    {#                                                <td style="text-align: center">{{ sc.fecha_asignada|date:'d-m-Y' }}</td>#}
+                    {#                                                <td style="text-align: center">#}
+                    {#                                                    <a class="btn btn-mini btn-info detallesolv tl" title="Detalles" href='#' svid="{{ sv.id }}" numsv="{{ sv.repr_id }}" nombrevend="{{ sv.vendedor }}"><i class="fa fa-list"></i></a>#}
+                    {#                                                    <a class="btn btn-mini btn-success tl btn-aprobarsv" title="Aprobar" href='#' svid="{{ sv.id }}"><i class="fa fa-check"></i></a>#}
+                    {#                                                    <a class="btn btn-mini btn-danger tl btn-denegarsv" title="Denegar" href='#' svid="{{ sv.id }}"><i class="fa fa-times"></i></a>#}
+                    {#                                                </td>#}
+                    {#                                            </tr>#}
+                    {#                                        {% empty %}#}
+                    {#                                            <tr>#}
+                    {#                                                <td colspan="15">#}
+                    {#                                                    No existen solicitudes de vendedores#}
+                    {#                                                </td>#}
+                    {#                                            </tr>#}
+                    {#                                        {% endfor %}#}
+                    {#                                        </tbody>#}
+                    {#                                    </table>#}
+                    {#                                </div>#}
+                    {#                            </div>#}
+                    {#                        </div>#}
+                    {#                    </div>#}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block moreblock %}
+    <div class="modal fade static" id="detalle_factura" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Detalles de factura: <span id="num_factura"></span> </h3>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade static" id="detalle_compra" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Detalles de compra: <span id="num_doc"></span> </h3>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade static" id="detalle_solicitudc" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Detalles de solicitud de compra #<span id="num_solc"></span> generada por el cliente: <span id="cliente_solc"></span></h3>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade static" id="detalle_solicitudv" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Detalles de solicitud de compra #<span id="num_solv"></span> generada por el vendedor: <span id="vendedor_solv"></span></h3>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

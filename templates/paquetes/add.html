@@ -1,0 +1,23 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_codigo, #id_descripcion, #id_unidadmedida, #id_tiposervicio, #id_sesiones, #id_precio, #id_precio_cliente_normal, #id_precio_cliente_corporativo, #id_precio_cliente_vip").addClass("validate[required]");
+
+            $("#id_sesiones").blur(function(){
+                numerico($(this), 1, 0, 0);
+            });
+
+            //Activar pestana
+            $("#pestana14").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/paquetes{% endblock %}
+{% block formdestination %}/paquetes{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='add'/>
+{% endblock %}
+{% block formback %}/paquetes{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

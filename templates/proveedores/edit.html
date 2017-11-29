@@ -1,0 +1,28 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <style>
+        #formulary table td input#id_email { text-transform: none; }
+    </style>
+    <script>
+        $(function(){
+
+            $("#id_nombre").addClass("validate[required]");
+            $("#id_identificacion").addClass("input-large");
+            $("#id_nombre, #id_alias, #id_direccion, #id_telefono, #id_celular, #id_email, #id_fax").addClass("input-block-level");
+            $("#id_telefono, #id_celular, #id_email, #id_fax").addClass("input-xlarge");
+
+            //Activar pestana
+            $("#pestana5").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/proveedores{% endblock %}
+{% block formdestination %}/proveedores{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='edit'/>
+    <input type='hidden' name='id' value='{{ proveedor.id }}'/>
+{% endblock %}
+{% block formback %}/proveedores{% endblock %}

@@ -1,0 +1,77 @@
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th style="width: 50px">Tipo</th>
+        <th style="width: 70px">C&oacute;digo</th>
+        <th>Descripci&oacute;n</th>
+        <th style="width: 120px">Categor&iacute;a</th>
+        <th style="width: 40px; text-align: center">Cant.</th>
+        <th style="width: 50px; text-align: center">Precio</th>
+        <th style="width: 50px; text-align: center">Bruto</th>
+        <th style="width: 50px; text-align: center">%Dscto.</th>
+        <th style="width: 50px; text-align: center">Dscto.</th>
+        <th style="width: 50px; text-align: center">Neto</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for d in detalles %}
+        <tr class="normal11">
+            <td>
+                {% if d.producto %}
+                    PROD
+                {% elif d.servicio %}
+                    SERV
+                {% else %}
+                    PAQ
+                {% endif %}
+            </td>
+            <td>
+                {% if d.producto %}
+                    {{ d.producto.codigo }}
+                {% elif d.servicio %}
+                    {{ d.servicio.codigo }}
+                {% else %}
+                    {{ d.paquete.codigo }}
+                {% endif %}
+            </td>
+            <td>
+                {% if d.producto %}
+                    {{ d.producto.descripcion }}
+                {% elif d.servicio %}
+                    {{ d.servicio.descripcion }}
+                {% else %}
+                    {{ d.paquete.descripcion }}
+                {% endif %}
+            </td>
+            <td>
+                {% if d.producto %}
+                    {{ d.producto.tipoproducto.nombre }}
+                {% elif d.servicio %}
+                    {{ d.servicio.tiposervicio.nombre }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td style="text-align: center">{{ d.cantidad|floatformat:0 }}</td>
+            <td style="text-align: right">${{ d.precio|floatformat:2 }}</td>
+            <td style="text-align: right">${{ d.valor_bruto|floatformat:2 }}</td>
+            <td style="text-align: right">${{ d.porciento_descuento|floatformat:2 }}</td>
+            <td style="text-align: right">${{ d.valor_descuento|floatformat:2 }}</td>
+            <td style="text-align: right">${{ d.valor|floatformat:2 }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="6">Iva: <b>${{ factura.iva|floatformat:2 }}</b> &nbsp; Total: <b>${{ factura.total|floatformat:2 }}</b></td>
+        <td style="text-align: right; font-weight: bold">$ {{ factura.bruto|floatformat:2 }}</td>
+        <td></td>
+        <td style="text-align: right; font-weight: bold">$ {{ factura.descuento|floatformat:2 }}</td>
+        <td style="text-align: right; font-weight: bold">$ {{ factura.subtotal|floatformat:2 }}</td>
+    </tr>
+    </tfoot>
+</table>
+
+{% if factura.observaciones %}
+    <span><b>Observaciones: </b> {{ factura.observaciones }}</span>
+{% endif %}

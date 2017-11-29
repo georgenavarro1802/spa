@@ -1,0 +1,53 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_codigo").attr("readonly", true);
+            $("#id_descripcion, #id_unidadmedida, #id_tipoproducto, #id_precio").addClass("validate[required]");
+
+            $("#id_precio, #id_minimo, #id_precio_cliente_normal, #id_precio_cliente_corporativo, #id_precio_cliente_vip").blur(function(){
+                numerico($(this), 0, 99999999, 2);
+            });
+
+            get_next_product_code = function () {
+                var cid = $("#id_tipoproducto").val();
+                var tid = $("#id_tipo").val();
+                if (cid){
+                    $.ajax({
+                        type: "POST",
+                        url: "/productos",
+                        data: {'action': 'get_next_codigo', 'cid': cid, 'tid': tid},
+                        success: function(data) {
+                            if (data.result == 'ok') {
+                                $("#id_codigo").val(data.codigo);
+                            } else {
+                                $.unblockUI();
+                                smoke.alert(data.mensaje);
+                            }
+                        },
+                        error: function() {
+                            $.unblockUI();
+                            smoke.alert("Error al enviar los datos.");
+                        },
+                        dataType: "json"
+                    });
+                }else{
+                    $("#id_codigo").val("");
+                }
+            };
+
+            $("#id_tipoproducto, #id_tipo").change(get_next_product_code);
+
+            //Activar pestana
+            $("#pestana2").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/productos{% endblock %}
+{% block formdestination %}/productos{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='add'/>
+{% endblock %}
+{% block formback %}/productos{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

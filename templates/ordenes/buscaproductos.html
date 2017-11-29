@@ -1,0 +1,447 @@
+<script>
+
+    $(function() {
+
+        $("#ruccliente1, #nombrecliente1, #tipocliente1, #tipoclienteid1, #telefonocliente1, #direccioncliente1, #direccioncliente1, #emailcliente1").attr('disabled', true);
+
+        $("#id_ruc, #id_telefono").addClass("input-small");
+
+        $("#fechafactura").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+        ////////////////// PRODUCTOS //////////////////////////
+        eliminarItem = function() {
+            var index = $(this).attr("index");
+            items.productos[index].cantidad -= 1;
+            items.productos[index].valor -= items.productos[index].pvpproducto;
+            if (items.productos[index].cantidad == 0){
+                items.productos.splice(index,1);
+            }
+            updateItems();
+            return false;
+        };
+
+        // Actualizar tabla de productos
+        updateItems = function() {
+            var subtotal = 0;
+            var iva = 0;
+            var total = 0;
+            if (items.productos.length == 0) {
+                $("#listaprod").html("<tr><td></td><td colspan='15'><i>Seleccione items para la orden de servicio</i></td></tr>");
+                $("#subtotalvalor").html("0.00");
+                $("#ivavalor").html("0.00");
+                $("#totalvalor").html("0.00");
+                $("#confirmar").hide();
+                $("#cancelar").hide();
+            } else {
+                $("#listaprod").empty();
+                var sum = 0;
+                for (var i in items.productos) {
+                    var item = items.productos[i];
+                    $("#listaprod").append("<tr>" +
+                            "<td style='text-align: center'><a href='#' class='btn btn-danger btn-tini btn-mini eliminaritem' index='"+i+"'><i class='fa fa-minus'></i> </a></td>" +
+                            "<td>"+item.nombreproducto+"</td>" +
+                            "<td style='text-align: center'>"+item.tipoproducto+"</td>" +
+                            "<td style='text-align: center'>"+item.categoriaproducto+"</td>" +
+                            "<td class='larger' style='text-align: center'><a id='itemcantidad"+i+"' class='adicionarcantidad' href='#' index='"+i+"'>"+item.cantidad+"</a></td>" +
+                            "<td class='larger' style='text-align: right; display:none'>$ "+item.pvpproducto.toFixed(2)+"</td>" +
+                            "<td class='larger' style='text-align: right; display:none' id='itemvalor"+i+"'>$ "+item.valor.toFixed(2)+"</td>" +
+                            "</tr>");
+                    sum = sum + item.valor;
+                }
+                subtotal = sum;
+                iva = Math.round((subtotal * {{ iva }})*100)/100;
+                total =  Math.round((subtotal + iva) *100)/100;
+                $("#listaprod").find(".eliminaritem").click(eliminarItem);
+                $("#listaprod").find(".adicionarcantidad").click(function(){
+                    $("#input-number").val("");
+                    $("#indice").val($(this).attr('index'));
+                    $("#cantidadpanel").modal({'backdrop':'static', 'width': '330px', 'height': '450px'}).modal("show");
+                });
+                $("#subtotalvalor").html(subtotal.toFixed(2));
+                $("#ivavalor").html(iva.toFixed(2));
+                $("#totalvalor").html(total.toFixed(2));
+            }
+        };
+
+        /////////////////////////// FUNCION PRINCIPAL ///////////////////////////////
+        $(".iconprod").click(function(){
+            var idprod = $(this).attr("idprod");
+            var codprod = $(this).attr("codprod");
+            var tipoprod = $(this).attr("tipo");
+            var categoriaprod = $(this).attr("categoria");
+            var nombreprod = $(this).attr("nombreprod");
+            var invprod = parseFloat($(this).attr("invprod"));
+            var pvpprod = parseFloat($(this).attr("pvpprod"));
+            var fotoprod = $(this).attr("fotoprod");
+            var aliasprod = $(this).attr("aliasprod");
+            var flat = false;
+            var item = {};
+            var subtotal = 0;
+            var iva = 0;
+            if (items.productos.length > 0){
+                for (var i in items.productos) {
+                    var itemp = items.productos[i];
+
+                    if (codprod == itemp.codproducto){
+                        if (itemp.cantidad + 1 > itemp.invproducto && tipoprod == "PRODUCTO"){
+                            notificarAlerta('Alerta', 'Ha sobrepasado la cantidad disponible en inventario', 'Cerrar', cerrarNotificacionPanel);
+                            flat = true;
+                            break;
+                        }
+                        itemp.cantidad += 1;
+                        itemp.valor = Math.round((itemp.cantidad * itemp.pvpproducto)*100)/100;
+                        flat = true;
+                    }
+                }
+            }
+            if (!flat){
+                item.codproducto = codprod;
+                item.nombreproducto = nombreprod;
+                item.tipoproducto = tipoprod;
+                item.categoriaproducto = categoriaprod;
+                item.aliasproducto = aliasprod;
+                item.cantidad = 1;
+                item.pvpproducto = pvpprod;
+                item.invproducto = invprod;
+
+                item.valor = Math.round((item.cantidad * item.pvpproducto)*100)/100;
+                subtotal = item.valor;
+                iva = Math.round((subtotal * iva)*100)/100;
+                item.subtotal = subtotal;
+                item.iva = iva;
+
+                items.productos.push(item);
+
+                $("#confirmar").show();
+                $("#cancelar").show();
+            }
+
+            updateItems();
+            return false;
+        });
+
+        datoscli = true;
+
+        function reiniciar_pagina(){
+            location.href = '/ordenes?action=add';
+        }
+
+        // SOLICITUD PANEL
+        $("#btn-generar").click(function(){
+            var ruccli = $("#ruccliente").val();
+            var nombrecli = $("#nombrecliente").val();
+
+            items.subtotal = $("#subtotal").text().replace('$','').trim();
+            items.iva = $("#iva").text().replace('$','').trim();
+            items.total = $("#total").text().replace('$','').trim();
+            items.observacionesfactura = $("#observacionesfactura").val();
+
+            if (ruccli && nombrecli){
+                items.ruccliente = ruccli;
+                items.nombrecliente = nombrecli;
+                items.direccioncliente = $("#direccioncliente1").val();
+                items.tipocliente = $("#tipocliente1").val();
+                items.tipoclienteid = $("#tipoclienteid1").val();
+                items.telefonocliente = $("#telefonocliente1").val();
+                items.emailcliente = $("#emailcliente1").val();
+                datoscli = true;
+            }else{
+                datoscli = false;
+            }
+
+            if (datoscli){
+                $.post("/ordenes", {'action': 'generar', "items": JSON.stringify(items), 'productos': JSON.stringify(items.productos)}, function(data){
+                    $("#facturapanel").modal("hide");
+                    $("#alertacliente").hide();
+                    if (data.result=='ok'){
+                        notificarInfo('Orden generada', 'Se ha generado con &eacute;xito la orden de servicio: <b>#'+data.orden+'</b>, para el cliente: <b>'+data.cliente+'</b>');
+                        setTimeout(reiniciar_pagina, 2500);
+                    }else{
+                        notificarAlerta('Alerta', data.mensaje, 'Cerrar', cerrarNotificacionPanel);
+                    }
+                }, "json");
+            }else{
+                $("#alertacliente").show();
+            }
+            return false;
+        });
+
+        $("#facturapanel .btn-cancelar").click(function(){
+            $("#facturapanel").modal("hide");
+            return false;
+        });
+
+        //Botones de Confirmar o Cancelar
+        $("#confirmar").click(function(){
+            $("#alertacliente").hide();
+            var vt = parseFloat($("#totalvalor").html());
+            var subtotal = parseFloat($("#subtotalvalor").html());
+            var iva = parseFloat($("#ivavalor").html());
+            $("#subtotal").html("$ "+subtotal.toFixed(2));
+            $("#iva").html("$ "+iva.toFixed(2));
+            $("#total").html("$ "+vt.toFixed(2));
+            $("#ruccliente1").val($("#ruccliente").val());
+            $("#nombrecliente1").val($("#nombrecliente").val());
+            $("#tipocliente1").val($("#tipocliente").val());
+            $("#tipoclienteid1").val($("#tipoclienteid").val());
+            $("#telefonocliente1").val($("#telefonocliente").val());
+            $("#direccioncliente1").val($("#direccioncliente").val());
+            $("#emailcliente1").val($("#emailcliente").val());
+
+            $("#facturapanel").modal({'backdrop':'static', 'width': '650px', 'height': '350px'}).modal("show");
+            return false;
+        });
+
+        $("#cancelar").click(function(){
+            location.reload();
+        });
+
+        {# NUMPAD PARA CANTIDADES #}
+        $("#cantidadpanel .btn-cancelar").click(function(){
+            $("#cantidadpanel").modal("hide");
+            return false;
+        });
+
+        $("#cantidadpanel .btn-cantidad").click(function(){
+            var cantidad = $("#input-number").val();
+            var indice = $("#indice").val();
+            var sum = 0;
+            var subtotal = 0;
+            var iva = 0;
+            var total = 0;
+            var itemp = items.productos[indice];
+
+            if (cantidad > itemp.invproducto && itemp.tipoproducto == 'PRODUCTO'){
+                notificarAlerta('Alerta', 'Ha sobrepasado la cantidad disponible en inventario', 'Cerrar', cerrarNotificacionPanel);
+            }else{
+                itemp.cantidad = cantidad;
+                itemp.valor = Math.round((itemp.cantidad * itemp.pvpproducto)*100)/100;
+                $("#itemcantidad"+indice).html(itemp.cantidad);
+                $("#itemvalor"+indice).html("$ " + itemp.valor.toFixed(2));
+            }
+
+            for (var i in items.productos) {
+                var item = items.productos[i];
+                sum = sum + item.valor;
+            }
+            subtotal = sum;
+            iva = Math.round((subtotal * {{ iva }})*100)/100;
+            total =  Math.round((subtotal + iva) *100)/100;
+            $("#subtotalvalor").html(subtotal.toFixed(2));
+            $("#ivavalor").html(iva.toFixed(2));
+            $("#totalvalor").html(total.toFixed(2));
+
+            $("#cantidadpanel").modal("hide");
+
+            return false;
+        });
+
+        $('.numsel').click(function(){
+            var elem = $("#input-number");
+            var temp = '';
+            var num = '';
+            if($(this).attr('rel') != "-1"){
+                num = $(this).attr('rel');
+                temp = elem.val() + num;
+                elem.val(temp);
+            }else{
+                temp = elem.val();
+                temp = temp.slice(0, temp.length-1);
+                elem.val(temp);
+            }
+        });
+
+        $(".tl").tooltip({placement:"top"});
+
+    });
+
+</script>
+
+{% if tipoprod and productos %}
+    {% for inv in productos %}
+        <div class='iconprod' id='icon{{ inv.producto.codigo }}' tipo="PRODUCTO" categoria="{{ inv.producto.tipoproducto.nombre }}" categoriaid="{{ inv.producto.tipoproducto.id }}" idprod='{{ inv.producto.id }}' codprod="{{ inv.producto.codigo }}" nombreprod="{{ inv.producto.nombre_corto }}" invprod="{{ inv.cantidad|floatformat:0 }}" pvpprod="{% if tipocliente == 1 %}{{ inv.producto.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ inv.producto.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ inv.producto.precio_cliente_vip|floatformat:2 }}{% endif %}" fotoprod="{{ inv.producto.download_foto }}" aliasprod="{{ inv.producto.alias }}">
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    {{ inv.producto.codigo }}
+                    <span style="float: right"> $ {% if tipocliente == 1 %}{{ inv.producto.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ inv.producto.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ inv.producto.precio_cliente_vip|floatformat:2 }}{% endif %}</span>
+                </div>
+                <div class="panel-body" style="height: 50px; cursor: pointer">
+                    {% if inv.producto.alias %}
+                        {{ inv.producto.alias }}
+                    {% else %}
+                        {{ inv.producto.descripcion|slice:":20" }}...
+                    {% endif %}
+                    <br/>
+                    <span style="float: right">
+                        <label class="badge {% if inv.cantidad < inv.producto.minimo %}badge-important{% else %}badge-success{% endif %}"> {{ inv.cantidad|floatformat:0 }}</label>
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    {% if tipoprod %}
+        <div class="alert alert-danger">
+            <h5><i class="fa fa-info-circle"></i> No existen <strong>productos</strong> con existencias en la categor&iacute;a: {% if favoritos %}FAVORITOS{% endif %}{% if tipoprod %}{{ tipoprod.nombre }}{% endif %}</h5>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% if servicios %}
+    {% for servicio in servicios %}
+        <div class='iconprod' id='icon{{ servicio.codigo }}' tipo="SERVICIO" categoria="{{ servicio.tiposervicio.nombre }}" categoriaid="{{ servicio.tiposervicio.id }}" idprod='{{ servicio.id }}' codprod="{{ servicio.codigo }}" nombreprod="{{ servicio.nombre_corto }}" invprod="1" pvpprod="{% if tipocliente == 1 %}{{ servicio.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ servicio.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ servicio.precio_cliente_vip|floatformat:2 }}{% endif %}" aliasprod="{{ servicio.alias }}">
+            <div class="panel panel-turquesa">
+                <div class="panel-heading">
+                    {{ servicio.codigo }}
+                    <span style="float: right"> $ {% if tipocliente == 1 %}{{ servicio.precio_cliente_normal|floatformat:2 }}{% elif tipocliente == 2 %}{{ servicio.precio_cliente_corporativo|floatformat:2 }}{% else %}{{ servicio.precio_cliente_vip|floatformat:2 }}{% endif %}</span>
+                </div>
+                <div class="panel-body" style="height: 50px; cursor:pointer;">
+                    {{ servicio.alias }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    {% if tiposerv %}
+        <div class="alert alert-danger">
+            <h5><i class="fa fa-info-circle"></i> No existen <strong>servicios</strong> en la categor&iacute;a: {% if tiposerv %}{{ tiposerv.nombre }}{% endif %}</h5>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% block moreblock %}
+    {#  MODAL - ORDEN  #}
+    <div class="modal fade static" id="facturapanel" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Confirmaci&oacute;n de la orden de servicio</h3>
+        </div>
+        <div class="modal-body panel-body">
+            <div style="width: 100%; margin-top: 10px">
+                <div class="alert alert-danger" id="alertacliente" style="display: none">
+                    <span><strong>Error</strong>, revise el formulario de cliente, los campos <b>identificaci&oacute;n</b> y <b>nombre</b> son obligatorios</span>
+                </div>
+                <h5>Datos del Cliente</h5>
+                <table class="well table table-condensed">
+                    <tbody>
+                    <tr style="font-weight: bold">
+                        <td style="width: 50px; vertical-align: middle">
+                            Identificaci&oacute;n:
+                        </td>
+                        <td style="width: 150px">
+                            <input type="text" style="margin-top: 10px" class="input-block-level" id='ruccliente1' myval=""/>
+                        </td>
+                        <td style="width: 50px; vertical-align: middle">
+                            Nombre:
+                        </td>
+                        <td style="width: 450px">
+                            <input type="text" style="margin-top: 10px" class="input-block-level" id='nombrecliente1'/>
+                        </td>
+                    </tr>
+                    <tr style="font-weight: bold">
+                        <td style="width: 50px; vertical-align: middle">
+                            Tipo:
+                        </td>
+                        <td style="width: 150px">
+                            <input type="text" style="margin-top: 10px" class="input-block-level" id='tipocliente1'/>
+                            <input type="hidden" id='tipoclienteid1'/>
+                        </td>
+                        <td style="width: 50px; vertical-align: middle">
+                            Direcci&oacute;n:
+                        </td>
+                        <td style="width: 450px">
+                            <input type="text" style="margin-top: 10px" class="input-block-level" id='direccioncliente1'/>
+                        </td>
+                    </tr>
+                    <tr style="font-weight: bold">
+                        <td style="width: 50px; vertical-align: middle">
+                            Tel&eacute;fono:
+                        </td>
+                        <td style="width: 150px">
+                            <input type="text" style="margin-top: 10px" class="input-block-level" id='telefonocliente1'/>
+                        </td>
+                        <td style="width: 50px; vertical-align: middle">
+                            Email:
+                        </td>
+                        <td style="width: 450px">
+                            <input type="text" style="margin-top: 10px; text-transform: lowercase" class="input-block-level" id='emailcliente1'/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="width: 100%; float: left; margin-top: 10px">
+                <form>
+                    <label for="observacionesfactura" style="font-weight: bold">Observaciones:</label>
+                    <textarea rows="3" cols="30" class="input-block-level" style="text-transform: none" id='observacionesfactura'></textarea>
+                </form>
+            </div>
+            <div style="width: 250px; float: right; margin-top: 10px">
+                <br/>
+                <table class="well table table-condensed">
+                    <tbody>
+                    <tr style="font-weight: bold">
+                        <td style="width: 60px; vertical-align: middle">
+                            Subtotal:
+                        </td>
+                        <td style="width: 80px; text-align: right" class="larger">
+                            <span id='subtotal'>$ 0.00</span>
+                        </td>
+                    </tr>
+                    <tr style="font-weight: bold">
+                        <td style="width: 60px; vertical-align: middle">
+                            Iva:
+                        </td>
+                        <td style="width: 80px; text-align: right" class="larger">
+                            <span id='iva'>$ 0.00</span>
+                        </td>
+                    </tr>
+                    <tr style="font-weight: bold">
+                        <td style="width: 60px; vertical-align: middle">
+                            Total:
+                        </td>
+                        <td style="width: 80px; text-align: right; font-weight: bold" class="bigger">
+                            <span id='total'>$ 0.00</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" id='btn-generar' class="btn btn-warning"><i class="fa fa-check"></i> Generar Orden</a>
+            <a href="#" class="btn btn-cancelar"><i class="fa fa-arrow-left"></i> Cancelar</a>
+        </div>
+    </div>
+
+    {#  NUMPAD PARA CANTIDAD  #}
+    <div class="modal fade static" id="cantidadpanel" style="display: none;">
+        <div class="modal-header">
+            <h3 class="paneltitle">Cantidad</h3>
+        </div>
+        <div class="modal-body panel-body">
+            <div id="container_numpad">
+                <input id="indice" type="hidden" value=""/>
+                <input id="input-number" type="text" placeholder="1234567890"/>
+                <ul class="numpad">
+                    <li class="numsel" rel="1">1</li>
+                    <li class="numsel" rel="2">2</li>
+                    <li class="numsel" rel="3">3</li>
+                    <li class="numsel" rel="4">4</li>
+                    <li class="numsel" rel="5">5</li>
+                    <li class="numsel" rel="6">6</li>
+                    <li class="numsel" rel="7">7</li>
+                    <li class="numsel" rel="8">8</li>
+                    <li class="numsel" rel="9">9</li>
+                    <li class="numsel" rel=".">.</li>
+                    <li class="numsel" rel="0">0</li>
+                    <li class="numsel" rel="-1">C</li>
+                </ul>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn btn-cantidad btn-primary"><i class="fa fa-calculator"></i> Aceptar</a>
+            <a href="#" class="btn btn-cancelar"><i class="fa fa-arrow-left"></i> Cancelar</a>
+        </div>
+    </div>
+
+{% endblock %}

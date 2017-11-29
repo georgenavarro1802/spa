@@ -1,0 +1,20 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+            $("#id_producto").addClass("validate[required]");
+
+            //Activar pestana
+            $("#pestana13").addClass('current');
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/servicios{% endblock %}
+{% block formdestination %}/servicios?action=receta&id={{ servicio.id }}{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='addreceta'/>
+    <input type='hidden' name='id' value='{{ servicio.id }}'/>
+{% endblock %}
+{% block formback %}/servicios?action=receta&id={{ servicio.id }}{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

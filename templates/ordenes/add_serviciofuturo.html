@@ -1,0 +1,21 @@
+{% extends "ajaxformbs.html" %}
+{% block extraheading %}
+    <script>
+        $(function(){
+
+            $("#id_servicio").addClass("validate[required]");
+
+            $("#id_fecha").datepicker({format:"dd-mm-yyyy"}).on('changeDate', function(ev){ $(this).datepicker('hide'); });
+
+        });
+    </script>
+{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formaction %}/ordenes{% endblock %}
+{% block formdestination %}/ordenes?action=serviciosfuturos&id={{ orden.id }}{% endblock %}
+{% block formextra %}
+    <input type='hidden' name='action' value='add_serviciofuturo'/>
+    <input type='hidden' name='id' value='{{ orden.id }}'/>
+{% endblock %}
+{% block formback %}/ordenes?action=serviciosfuturos&id={{ orden.id }}{% endblock %}
+{% block buttonname %}Guardar{% endblock %}

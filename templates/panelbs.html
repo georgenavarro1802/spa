@@ -1,0 +1,365 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Clientes que mas compran
+            $('#contenido1').highcharts({
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: ''
+                },
+                xAxis: {
+                    categories: [
+                        {% for v in clientes_mas_compran %}
+                            '{{ v.nombre }}' {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Facturas'
+                    }
+                },
+                tooltip: {
+                    headerFormat:   '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat:    '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                    footerFormat:   '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Enliven',
+                    data: [
+                        {% for v in clientes_mas_compran %}
+                            {{ v.cantidadventas }} {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }]
+            });
+
+            //Productos mas vendidos
+            $('#contenido2').highcharts({
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: ''
+                },
+                xAxis: {
+                    categories: [
+                        {% for p in productos_mas_vendidos %}
+                            '{{ p.codigo }}' {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Facturas'
+                    }
+                },
+                tooltip: {
+                    headerFormat:   '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat:    '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                    footerFormat:   '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Enliven',
+                    data: [
+                        {% for p in productos_mas_vendidos %}
+                            {{ p.cantidadventas }} {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }]
+            });
+
+            {% if info %}
+                smoke.alert("{{ info }}");
+            {% endif %}
+
+            //Activar pestana
+            $("#pestana0").addClass('current');
+
+    ///////// Solicitudes directas de compras (usuarios Vendedores y Clientes) /////////////////////////
+
+            items = {}; //Arreglo con todos los elementos de la lista de productos a facturar
+            items.productos = [];
+            sumTotal = 0;
+
+            buscar_productos = function(tipoid, fav, idinv){
+                bloqueointerface();
+                $.get("/", {"action":"buscaproductos", "tipoid": tipoid, "favoritos": fav, "idinv": idinv }, function(data){
+                    $.unblockUI();
+                    $("#areaproductos").html(data);
+                }, "html");
+            };
+
+            $(".btntipoprod").click(function(){
+                var tid = $(this).attr('tid');
+                var favorito = '0';
+                var idprod = '';
+                $(".btntipoprod").removeClass("btn-success");
+                $("#btnfavoritos").removeClass("btn-success");
+                $(this).addClass("btn-success");
+                buscar_productos(tid, favorito, idprod);
+                return false;
+            });
+
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    {% if es_administrador or es_cajero %}
+        <div class="row-fluid">
+            <div class="span2"></div>
+            <div class="span8">
+                <!-- Tablas totales y cantidades -->
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Valores</div>
+                            <div class="panel-body">
+                                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                    <tbody>
+                                    <tr>
+                                        <td class="larger" style="width: 70%">Ventas ({{ cantidad_facturas_total|floatformat:0 }})</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">$ {{ valores_ventas_total|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Compras ({{ cantidad_compras_total|floatformat:0 }})</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">$ {{ valor_total_cif_compras|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Pagos ({{ cantidad_pagos_total|floatformat:0 }})</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">$ {{ pagos_total|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Inventarios ({{ cantidad_inventario_con_existencia|floatformat:0 }})</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">$ {{ valor_inventario_con_existencia|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Por Cobrar ({{ cantidad_facturas_por_cancelar|floatformat:0 }})</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">$ {{ valor_facturas_por_cancelar|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Cantidades</div>
+                            <div class="panel-body">
+                                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                    <tbody>
+                                    <tr>
+                                        <td class="larger">Productos agotados</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">{{ cantidad_inventario_agotado|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger" style="width: 70%">Productos bajo m&iacute;nimos </td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">{{ cantidad_inventario_bajo_minimo|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Solicitudes pendientes - Clientes</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">{{ cantidad_solicitudes_pendientes_clientes|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Solicitudes pendientes - Vendedores</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">{{ cantidad_solicitudes_pendientes_vendedores|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Solicitudes asignadas a ventas</td>
+                                        <td class="larger" style="text-align: right; font-weight: bold">{{ cantidad_solicitudes_asignadas|floatformat:0 }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <!-- Graficos -->
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Clientes que mas compran</div>
+                            <div class="panel-body">
+                                <div id="contenido1" style="height: 300px; margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Productos mas vendidos</div>
+                            <div class="panel-body">
+                                <div id="contenido2" style="height: 300px; margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <!-- Tablas ultimas ventas y compras -->
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Ultimas ventas</div>
+                            <div class="panel-body">
+                                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                    <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th style="width: 70px; text-align: center">Caja</th>
+                                        <th style="width: 80px; text-align: center">Fecha</th>
+                                        <th style="width: 60px; text-align: center">Valor</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for v in ultimas_ventas %}
+                                        <tr>
+                                            <td>{{ v.cliente.nombre }}</td>
+                                            <td style="text-align: center">{{ v.cajero.usuario }}</td>
+                                            <td style="text-align: center">{{ v.fecha|date:'d-m-Y' }}</td>
+                                            <td style="text-align: right">$ {{ v.total|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Ultimas compras</div>
+                            <div class="panel-body">
+                                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                    <thead>
+                                    <tr>
+                                        <th>Proveedor</th>
+                                        <th style="width: 100px; text-align: center">Fecha</th>
+                                        <th style="width: 70px; text-align: center">Valor</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for c in ultimas_compras %}
+                                        <tr>
+                                            <td>{{ c.proveedor.nombre }}</td>
+                                            <td style="text-align: center">{{ c.fecha|date:'d-m-Y' }}</td>
+                                            <td style="text-align: right">$ {{ c.valor|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <!-- Otras Tablas resumen y accesos usuarios -->
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Resumen</div>
+                            <div class="panel-body">
+                                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                    <thead>
+                                    <tr>
+                                        <th colspan="4">&nbsp;</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td class="larger" style="width: 35%">Ventas</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold; width: 15%">{{ cantidad_facturas_total }}</td>
+                                        <td class="larger" style="width: 35%">Compras</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_compras_total }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Productos</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_productos }}</td>
+                                        <td class="larger">Clientes</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_clientes }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Categor&iacute;as</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_categorias }}</td>
+                                        <td class="larger">Proveedores</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_proveedores }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Usuarios</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_usuarios }}</td>
+                                        <td class="larger">Vendedores</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_vendedores }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="larger">Anulaciones</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_facturas_anuladas }}</td>
+                                        <td class="larger">Formas Pago</td>
+                                        <td class="larger" style="text-align: center; font-weight: bold">{{ cantidad_formas_pago }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div class="panel panel-turquesa">
+                            <div class="panel-heading">Ultimas acciones</div>
+                            <div class="panel-body">
+                                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Usuario</th>
+                                        <th>Fecha/Hora</th>
+                                        <th style="width: 85px; text-align: center">M&oacute;dulo</th>
+                                        <th style="width: 85px; text-align: center">Acceso</th>
+                                        <th style="width: 25px; text-align: center">Acc.</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for a in ultimas_auditorias %}
+                                        <tr class="normal11">
+                                            <td>{{ a.usuario }}</td>
+                                            <td>{{ a.fecha|date:'d-m-Y' }} [{{ a.hora|date:'H:i' }}]</td>
+                                            <td style="text-align: center">{{ a.tabla }}</td>
+                                            <td style="text-align: center">{{ a.estacion }}</td>
+                                            <td style="text-align: center">{{ a.accion }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="span2"></div>
+        </div>
+    {% endif %}
+
+{% endblock %}

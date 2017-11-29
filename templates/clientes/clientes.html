@@ -1,0 +1,172 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            $("#search").click(function() {
+                var term = $("#searchfield").val().toUpperCase();
+                location.href = "/clientes?s="+term;
+            });
+
+            $('#searchfield').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#search").trigger("click");
+                }
+            });
+
+            $("#tiposel").change(function() {
+                var id = $(this).val();
+                location.href = '/clientes?t='+id;
+            });
+
+            //Activar pestana
+            $("#pestana4").addClass('current');
+
+        });
+
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+
+        <div class="panel panel-turquesa">
+            <div class="panel-heading">
+                <div class="row-fluid">
+                    <div class="span6">
+                        <form class="form-search">
+                            <input class='searchinput input-xlarge search-query' type='text' id='searchfield' value='{{ search }}'/>
+                            <a href="#" id='search' class='btn btn-success tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                            {% if search %}
+                                <a href="/clientes" id='allresults' class='btn btn-info tr' title="Ver todos"><i class="fa fa-list"></i></a>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <div class="span6">
+                        <label for="tiposel"></label>
+                        <select id='tiposel' style="float: right;">
+                            <option value='0'>-----</option>
+                            <option value="1" {% ifequal tipoid 1 %}selected="selected"{% endifequal %}>NORMAL</option>
+                            <option value="2" {% ifequal tipoid 2 %}selected="selected"{% endifequal %}>CORPORATIVO</option>
+                            <option value="3" {% ifequal tipoid 3 %}selected="selected"{% endifequal %}>VIP</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center">Tipo</th>
+                        <th style="width: 90px">Identificaci&oacute;n</th>
+                        <th style="width: 250px">Nombre</th>
+                        <th>Domicilio</th>
+{#                        <th style="width: 90px; text-align: center">FechaNac.</th>#}
+                        <th style="width: 200px">Email</th>
+                        <th style="width: 80px; text-align: center">Convencional</th>
+                        <th style="width: 80px; text-align: center">Celular</th>
+                        <th style="width: 100px; text-align: center">Usuario</th>
+                        <th style="width: 50px; text-align: center">Foto</th>
+                        <th style="width: 80px"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for cliente in clientes %}
+                        <tr>
+                            <td style="text-align: center">
+                                <label class="badge {% if cliente.tipo == 2 %}badge-success{% elif cliente.tipo == 3 %}badge-info{% else %}{% endif %} tl" title="{% if cliente.tipo == 2 %}Corporativo{% elif cliente.tipo == 3 %}Vip{% else %}Normal{% endif %}">
+                                    {{ cliente.get_tipo_display }}
+                                </label>
+                            </td>
+                            <td> {{ cliente.identificacion|default_if_none:"" }} </td>
+                            <td> {{ cliente.nombre }} </td>
+                            <td> {{ cliente.domicilio|default_if_none:"" }}</td>
+{#                            <td style="text-align: center"> {{ cliente.fecha_nacimiento|date:'d-m-Y' }}</td>#}
+                            <td> {{ cliente.email }} </td>
+                            <td> {{ cliente.telefono|default_if_none:'' }} </td>
+                            <td> {{ cliente.celular|default_if_none:'' }} </td>
+                            <td> {{ cliente.usuario|default_if_none:'' }} </td>
+                            <td style="text-align: center">
+                                {% if cliente.foto %}
+                                    <a href='{% if cliente.foto %}{{ cliente.download_foto }}{% endif %}' class="{% if cliente.foto %}fancybox{% endif %}" rel="group">
+                                        <img src="{{ cliente.download_foto }}" width="25px" height="25px">
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                        <span class="smaller10">Acciones</span>
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu pull-right list-group">
+                                        <li class="smaller10"><a class="list-group-item btn-form" href='/clientes?action=edit&id={{ cliente.id }}'><i class="fa fa-edit fa-fw"></i>&nbsp; Editar el cliente</a></li>
+                                        {% if not cliente.en_uso %}
+                                            <li class="smaller10"><a class="list-group-item btn-form" href="/clientes?action=delete&id={{ cliente.id }}"><i class="fa fa-times fa-fw"></i>&nbsp; Eliminar el cliente</a></li>
+                                        {% endif %}
+                                        <li class="smaller10"><a class="list-group-item btn-form" href="/clientes?action=resetear&id={{ cliente.id }}"><i class="fa fa-key"></i> &nbsp;&nbsp;Resetear la Clave</a> </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="15">
+                                {% if tipoid %}
+                                    {% if tipoid == 1 %}
+                                        No existen clientes <strong>NORMALES</strong> registrados en el sistema
+                                    {% elif tipoid == 2 %}
+                                        No existen clientes <strong>CORPORATIVOS</strong> registrados en el sistema
+                                    {% else %}
+                                        No existen clientes <strong>VIP</strong> registrados en el sistema
+                                    {% endif %}
+                                {% endif %}
+                                {% if search %}
+                                    No se han encontrado clientes segun la busqueda ingresada
+                                {% else %}
+                                    No existen clientes registrados en el sistema
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+    <div class='row-fluid'>
+        <div class="span4">
+            <a href="/clientes?action=add" class='btn btn-turquesa btn-form'><i class="fa fa-plus"></i> Adicionar</a>
+        </div>
+        <div class="span8">
+            {% if paging.num_pages > 20 %}
+                <div class='pagination'>
+                    <ul>
+                        {% if paging.primera_pagina %}
+                            <li><a href="/clientes?page=1">1</a></li>
+                            <li><a href="/clientes?page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                        {% endif %}
+                        {% for pagenumber in paging.paginas %}
+                            <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/clientes?page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif%}">{{ pagenumber }}</a></li>
+                        {% endfor %}
+                        {% if paging.ultima_pagina %}
+                            <li><a href="/clientes?page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                            <li><a href="/clientes?page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% else %}
+                <div class='pagination'>
+                    <ul>
+                        {% for pagenumber in paging.page_range %}
+                            <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/clientes?{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}{% if tipoid %}&t={{ tipoid }}{% endif %}">{{ pagenumber }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

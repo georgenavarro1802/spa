@@ -1,0 +1,131 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            $("#search").click(function() {
+                var term = $("#searchfield").val().toUpperCase();
+                location.href = "/paquetes?s="+term;
+            });
+
+            $('#searchfield').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#search").trigger("click");
+                }
+            });
+
+            //Activar pestana
+            $("#pestana14").addClass('current');
+
+        });
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class="row-fluid">
+
+        <div class="panel panel-turquesa">
+            <div class="panel-heading">
+                <form class="form-search">
+                    <input class='searchinput input-xlarge search-query' type='text' id='searchfield' value='{{ search }}'/>
+                    <a href="#" id='search' class='btn btn-success tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                    {% if search %}
+                        <a href="/paquetes" id='allresults' class='btn btn-info tr' title="Ver todos"><i class="fa fa-list"></i></a>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="panel-body">
+                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th colspan="6" style="text-align: center"></th>
+                        <th style="text-align: center">Ref.</th>
+                        <th colspan="3" style="text-align: center">Cliente Normal</th>
+                        <th colspan="3" style="text-align: center">Cliente Corporativo</th>
+                        <th colspan="3" style="text-align: center">Cliente Vip</th>
+                        <th colspan="2"></th>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Paquetes</th>
+                        <th style="width: 80px; text-align: center">Tipo</th>
+                        <th style="width: 40px; text-align: center">Sesiones</th>
+                        <th style="width: 40px; text-align: center">Prod.</th>
+                        <th style="width: 40px; text-align: center">Serv.</th>
+                        <th style="width: 50px; text-align: center">Precio</th>
+                        <th style="width: 50px; text-align: center">Precio</th>
+                        <th style="width: 50px; text-align: center">%Dcto</th>
+                        <th style="width: 50px; text-align: center">Valor</th>
+                        <th style="width: 50px; text-align: center">Precio</th>
+                        <th style="width: 50px; text-align: center">%Dcto.</th>
+                        <th style="width: 50px; text-align: center">Valor</th>
+                        <th style="width: 50px; text-align: center">Precio</th>
+                        <th style="width: 50px; text-align: center">%Dcto.</th>
+                        <th style="width: 50px; text-align: center">Valor</th>
+                        <th style="width: 40px; text-align: center">Elem.?</th>
+                        <th style="width: 70px"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in paquetes %}
+                        <tr>
+                            <td colspan="2">{{ p.codigo }} - {{ p.descripcion }}</td>
+                            <td>{{ p.get_tipo_display }}</td>
+                            <td style="text-align: center">{{ p.sesiones|floatformat:0 }}</td>
+                            <td style="text-align: center">{{ p.cantidad_productos|floatformat:0 }}</td>
+                            <td style="text-align: center">{{ p.cantidad_servicios|floatformat:0 }}</td>
+                            <td style="text-align: center">{{ p.precio|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.precio_cliente_normal|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.porciento_cliente_normal|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.valor_cliente_normal|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.precio_cliente_corporativo|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.porciento_cliente_corporativo|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.valor_cliente_corporativo|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.precio_cliente_vip|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.porciento_cliente_vip|floatformat:2 }}</td>
+                            <td style="text-align: center">{{ p.valor_cliente_vip|floatformat:2 }}</td>
+                            <td style="text-align: center; vertical-align: middle">
+                                {% if p.completo %}
+                                    <label class="badge badge-success">SI</label>
+                                {% else %}
+                                    <label class="badge badge-important">NO</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">
+                                        <span class="smaller10">Acciones</span>
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu pull-right list-group">
+                                        <li class="smaller10"><a class="list-group-item btn-form" href="/paquetes?action=elementos&id={{ p.id }}"><i class="fa fa-table fa-fw"></i>&nbsp; Elementos ({{ p.cantidad_elementos|floatformat:0 }})</a></li>
+                                        <li class="divider"></li>
+                                        <li class="smaller10"><a class="list-group-item btn-form" href="/paquetes?action=edit&id={{ p.id }}"><i class="fa fa-edit fa-fw"></i>&nbsp; Editar el paquete</a></li>
+                                        {% if not p.en_uso %}
+                                            <li class="smaller10"><a class="list-group-item btn-form" href="/paquetes?action=delete&id={{ p.id }}"><i class="fa fa-times fa-fw"></i>&nbsp; Eliminar el paquete</a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="15">
+                                {% if search %}
+                                    No se encontraron paquetes segun las busquedas seleccionadas
+                                {% else %}
+                                    No existen paquetes registrados en la entidad
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="row-fluid">
+        <a href="/paquetes?action=add" class="btn btn-turquesa btn-form"><i class="fa fa-plus"></i> Adicionar </a>
+    </div>
+
+{% endblock %}

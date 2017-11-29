@@ -1,0 +1,112 @@
+{% extends "basebs.html" %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            //Detalles orden de compra colaboradores
+            $("#detalle_orden .btn-aceptar").click(function(){
+                $("#detalle_orden").modal("hide");
+                return false;
+            });
+
+            $(".detalleorden").click(function() {
+                var ordenid = $(this).attr("ordenid");
+                var num_orden = $(this).attr("numorden");
+                var nombre_cliente = $(this).attr("nombrecliente");
+                var nombre_colaborador = $(this).attr("nombrecolaborador");
+                $.get("/ventas", {'action':'detalle_orden', 'ordenid': ordenid}, function(data) {
+                    $("#num_orden").html(num_orden);
+                    $("#cliente_orden").html(nombre_cliente);
+                    $("#colaborador_orden").html(nombre_colaborador);
+                    $("#detalle_orden .modal-body").html(data);
+                    $("#detalle_orden").modal({"backdrop":"static", "width": "1000px"}).modal("show");
+                }, "html");
+                return false;
+            });
+
+            //Activar pestana
+            $("#pestana1").addClass('current');
+
+        });
+
+    </script>
+{% endblock %}
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class="span10"></div>
+        <div class="span2">
+            <form>
+                <label for="clientesel"></label>
+                <select id='clientesel'>
+                    <option value='0'>-----</option>
+                    {% for c in clientes %}
+                        <option value="{{ c.id }}" {% ifequal clienteid c.id %}selected="selected"{% endifequal %}>{{ c.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class='row-fluid'>
+        <div class="panel panel-turquesa">
+            <div class="panel-heading">
+                Ordenes de Servicios
+            </div>
+            <div class="panel-body">
+                <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th style="width: 70px; text-align: center">No.</th>
+                        <th style="width: 120px; text-align: center">Fecha</th>
+                        <th style="width: 450px">Colaborador</th>
+                        <th>Cliente</th>
+                        <th style="width: 100px; text-align: center">SubTotal</th>
+                        <th style="width: 100px; text-align: center">IVA</th>
+                        <th style="width: 100px; text-align: center">Total</th>
+                        <th style="width: 130px"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for orden in ordenes %}
+                        <tr>
+                            <td style="text-align: center">{{ orden.repr_id }}</td>
+                            <td style="text-align: center"> {{ orden.fecha|date:'d-m-Y' }}</td>
+                            <td>{{ orden.colaborador.nombre }}</td>
+                            <td>{{ orden.cliente.nombre }} </td>
+                            <td style="text-align: center"> $ {{ orden.subtotal|floatformat:2 }}</td>
+                            <td style="text-align: center"> $ {{ orden.iva|floatformat:2 }}</td>
+                            <td style="text-align: center"> $ {{ orden.total|floatformat:2 }}</td>
+                            <td style="text-align: center">
+                                <a style="margin-right: 10px" class="btn btn-mini btn-info detalleorden tl" title="Detalles" href='#' ordenid="{{ orden.id }}" numorden="{{ orden.repr_id }}" nombrecolaborador="{{ orden.colaborador.nombre }}" nombrecliente="{{ orden.cliente.nombre }}"><i class="fa fa-list"></i></a>
+                                <a href="/ventas?oid={{ orden.id }}" class="btn btn-mini btn-success tl btn-importar btn-form" title="Importar"><i class="fa fa-check"></i> Importar</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="10">
+                                No existen ordenes de servicios pendientes de asignaci&oacute;n de facturas
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block moreblock %}
+    <div class="modal fade static" id="detalle_orden" style="display: none;">
+        <div class="modal-header">
+            <h4 class="paneltitle">Detalles de la orden de servicio #<span id="num_orden"></span></h4>
+            <h5 class="paneltitle">Cliente: <span id="cliente_orden"></span></h5>
+            <h5 class="paneltitle">Colaborador: <span id="colaborador_orden"></span></h5>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+            <div style="float: right">
+                <a href="#" class="btn btn-primary  btn-aceptar"><i class="fa fa-check"></i> Aceptar</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

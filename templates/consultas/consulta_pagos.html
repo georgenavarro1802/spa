@@ -1,0 +1,235 @@
+{% extends "basebs.html" %}
+{% load humanize %}
+{% block heading %}
+    <script>
+        $(function() {
+
+            // Busqueda en Pagos
+            $("#searchp").click(function() {
+                location.href = "/consultas?action=consulta_pagos&sp="+$("#searchfieldp").val().toUpperCase();
+            });
+            $('#searchfieldp').keyup(function(e) {
+                if(e.keyCode == 13) {
+                    $("#searchp").trigger("click");
+                }
+            });
+
+            //Activar pestana
+            $("#pestana9").addClass('current');
+        });
+    </script>
+{% endblock %}
+
+{% block canvas %}
+    <div class='row-fluid'>
+        <div class='span12'>
+            <div>
+                <ul class="nav nav-tabs">
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ventas" class="btn-form"><h3>Ventas</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_compras" class="btn-form"><h3>Compras</h3></a></li>
+                    <li style="margin-right: 5px" class="active"><a href="/consultas?action=consulta_pagos" class="btn-form"><h3>Cobros</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_inventarios" class="btn-form"><h3>Inventarios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cajeros" class="btn-form"><h3>Cajeros</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_colaboradores" class="btn-form"><h3>Colaboradores</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_cif" class="btn-form"><h3>Historial Costos</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_precios" class="btn-form"><h3>Historial Precios</h3></a></li>
+                    <li style="margin-right: 5px"><a href="/consultas?action=consulta_ordenes_servicio" class="btn-form"><h3>Ordenes Servicio</h3></a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class='row-fluid'>
+                            <div class="panel panel-turquesa">
+                                <div class="panel-heading">
+                                    <div class="row-fluid atright">
+                                        <input class='searchinput input-xlarge search-query' type='text' id='searchfieldp' value='{{ searchp }}' style="text-transform: uppercase"/>
+                                        <a href="#" id='searchp' class='btn btn-success btn-form tl' title="Buscar"><i class="fa fa-search"></i> </a>
+                                        {% if searchp %}
+                                            <a href="/consultas?action=consulta_pagos" id='allresults' class='btn btn-info btn-form tl' title="Ver todos"><i class="fa fa-list"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <table class='table table-bordered' cellpadding="0" cellspacing="0">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 40px">Cod.</th>
+                                            <th style="width: 80px">Tipo</th>
+                                            <th style="width: 50px">#Factura</th>
+                                            <th>Cliente</th>
+                                            <th style="width: 80px; text-align: center">Fecha</th>
+                                            <th style="width: 70px; text-align: center">Valor</th>
+                                            <th style="width: 70px">Autoriz/Ref</th>
+                                            <th style="width: 60px">Lote</th>
+                                            <th style="width: 100px">Posee / Efectua</th>
+                                            <th style="width: 100px">Banco</th>
+                                            <th style="width: 40px">Depos?</th>
+                                            <th style="width: 70px; text-align: center">Fech.Dep.</th>
+                                            <th style="width: 40px">Post?</th>
+                                            <th style="width: 70px">Tarjeta</th>
+                                            <th style="width: 70px">Procesador</th>
+                                            <th style="width: 60px"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for p in pagos %}
+                                            <tr>
+                                                <td>{{ p.repr_id }}</td>
+                                                <td style="color: #fff; font-weight: bold">
+                                                    <span class="label {% if p.es_efectivo %}label-success{% elif p.es_cheque %}label-info{% elif p.es_deposito %}label-warning{% elif p.es_transferencia %}label-warning{% elif p.es_tarjeta %}label-inverse{% elif p.es_retencion %}label-default{% endif %}">{{ p.tipo }}</span>
+                                                </td>
+                                                <td>{{ p.factura.numero }}</td>
+                                                <td>{{ p.factura.cliente.nombre }}</td>
+                                                <td style="text-align: center">{{ p.fecha|date:'d-m-Y' }}</td>
+                                                <td style="text-align: center">${{ p.valor|floatformat:2|intcomma }}</td>
+
+                                                <td>
+                                                    {% if p.es_cheque %}
+                                                        {{ p.pago_cheque.numero }}
+                                                    {% elif p.es_deposito %}
+                                                        {{ p.pago_deposito.numero }}
+                                                    {% elif p.es_transferencia %}
+                                                        {{ p.pago_transferencia.numero }}
+                                                    {% elif p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.referencia }}
+                                                    {% elif p.es_retencion %}
+                                                        {{ p.pago_retencion.numero }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {% if p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.lote|default_if_none:"-" }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td class="smaller">
+                                                    {% if p.es_cheque %}
+                                                        {{ p.pago_cheque.emite }}
+                                                    {% elif p.es_deposito %}
+                                                        {{ p.pago_deposito.efectuadopor }}
+                                                    {% elif p.es_transferencia %}
+                                                        {{ p.pago_transferencia.efectuadopor }}
+                                                    {% elif p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.poseedor }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td class="smaller">
+                                                    {% if p.es_cheque %}
+                                                        {{ p.pago_cheque.banco }}
+                                                    {% elif p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.banco }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque and p.pago_cheque.depositado %}
+                                                        <i class="fa fa-check tl" title="Depositado"></i>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque and p.pago_cheque.depositado %}
+                                                        {{ p.pago_cheque.fechadepositado|date:'d-m-Y' }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque and p.pago_cheque.postfechado %}
+                                                        <i class="fa fa-check tl" title="Postfechado"></i>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td class="smaller">
+                                                    {% if p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.tipotarjeta }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td class="smaller">
+                                                    {% if p.es_tarjeta %}
+                                                        {{ p.pago_tarjeta.procesadorpago }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    {% if p.es_cheque %}
+                                                        {% if not p.pago_cheque.protestado %}
+                                                            {% if not p.pago_cheque.depositado %}
+                                                                <a href="/consultas?action=depositar_cheque&id={{ p.id }}" class="btn btn-warning btn-mini tl" title="Depositar"><i class="fa fa-money"></i></a>
+                                                            {% endif %}
+                                                            <a href="/consultas?action=protestar_cheque&id={{ p.id }}" class="btn btn-danger btn-mini btn-form tl" title="Protestar"><i class="fa fa-refresh"></i></a>
+                                                        {% else %}
+                                                            <label class="label label-important"> PROTESTADO</label>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="10">
+                                                    {% if searchp %}
+                                                        No se han encontrado cobros segun la busqueda ingresada
+                                                    {% else %}
+                                                        No existen cobros registrados en el sistema
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='row-fluid'>
+                                {% if paging.num_pages > 20 %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% if paging.primera_pagina %}
+                                                <li><a href="/consultas?action=consulta_pagos&page=1">1</a></li>
+                                                <li><a href="/consultas?action=consulta_pagos&page={{ paging.ellipsis_izquierda }}" class="active">...</a></li>
+                                            {% endif %}
+                                            {% for pagenumber in paging.paginas %}
+                                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/consultas?action=consulta_pagos&page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                            {% if paging.ultima_pagina %}
+                                                <li><a href="/consultas?action=consulta_pagos&page={{ paging.ellipsis_derecha }}" class="active">...</a></li>
+                                                <li><a href="/consultas?action=consulta_pagos&page={{ paging.num_pages }}">{{ paging.num_pages }}</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class='pagination'>
+                                        <ul>
+                                            {% for pagenumber in paging.page_range %}
+                                                <li {% ifequal pagenumber page.number %}class='active'{% endifequal %}><a href="/consultas?action=consulta_pagos&{% if search %}s={{ search }}&{% endif %}page={{ pagenumber }}">{{ pagenumber }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "ajaxconfirmacionbs.html" %}
+{% block atras %}/clientes{% endblock %}
+{% block titulo %}{{ title }}{% endblock %}
+{% block formback %}/clientes{% endblock %}
+{% block formdestination %}/clientes?id={{ cliente.id }}{% endblock %}
+{% block formaction %}/clientes{% endblock %}
+{% block formactionvalue %}resetear{% endblock %}
+{% block formobjectid %}{{ cliente.id }}{% endblock %}
+{% block mensaje %}Est&aacute; seguro que desea resetear la clave de: {% endblock %}
+{% block formobjectrepr %}{{ cliente.usuario.username }}{% endblock %}
