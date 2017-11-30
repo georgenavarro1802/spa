@@ -72,7 +72,7 @@
             };
 
             sinurlatrasbutton = function(){
-                if (location.pathname=='/'){
+                if (location.pathname==='/'){
                     $("#urlatrasbutton").remove();
                 }
             };
@@ -88,7 +88,7 @@
             numerico = function(elemento, min, max, decimales) {
                 var nvalor;
                 var valor = elemento.val();
-                if (valor==""){
+                if (valor===""){
                     valor = parseFloat(min).toFixed(decimales);
                     elemento.val(valor);
                     return;
@@ -118,7 +118,7 @@
                 var num_multi = Math.floor(numero * multiplicador);
                 var num_redondeado = (Math.round(num_multi/10)) * 10 / multiplicador;
 
-                if (num_redondeado == 0){
+                if (num_redondeado === 0){
                     return 0;
                 }else{
                     if ( !isNaN(num_redondeado))
@@ -133,7 +133,7 @@
                 var numero = $(obj).val();
                 var presicion = 2;
                 if (!isNaN(numero)){
-                    if (numero == 0)
+                    if (numero === 0)
                         $(obj).val((0).toFixed(presicion));
                     else
                         $(obj).val(redondeo(numero, presicion).toFixed(2));

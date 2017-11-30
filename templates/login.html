@@ -18,7 +18,7 @@
                 </ul>
             </div>
             <!-- Form para los usuarios del Centro -->
-            <form class="well form-xs" action='/login' method="POST">
+            <form class="well form-xs" action="{% url 'login_user' %}" method="POST">
                 {% if error %}
                     <div class="alert alert-error">
                         {% ifequal error "1" %}

@@ -865,13 +865,13 @@ class Producto(models.Model):
     precio_cliente_vip = models.FloatField(default=0)
     favorito = models.BooleanField(default=False)
     foto = models.FileField(upload_to='fotos/%Y/%m/%d', blank=True, null=True)
-    alias = models.CharField(max_length=50, blank=True, null=True)
-    codigobarra = models.CharField(max_length=20, blank=True, null=True)
+    alias = models.CharField(max_length=60, blank=True, null=True)
+    codigobarra = models.CharField(max_length=30, blank=True, null=True)
     minimo = models.FloatField(default=0, blank=True, null=True)
     orden = models.IntegerField(default=0)
     con_iva = models.BooleanField(default=True)
     activo = models.BooleanField(default=True)
-    marca = models.CharField(max_length=200, blank=True, null=True)
+    marca = models.CharField(max_length=300, blank=True, null=True)
 
     def __str__(self):
         return '{} - {}'.format(self.codigo, self.descripcion)
